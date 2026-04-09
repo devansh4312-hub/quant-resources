@@ -1,0 +1,3195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QUANT_OS — Quantitative Finance Terminal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* Surfaces - refined dark palette */
+    --surface-lowest: #080b12;
+    --surface-low: #0f1419;
+    --surface-container: #161b22;
+    --surface-container-high: #1c232b;
+    --surface-container-highest: #242a33;
+    --bg-input: #0d1117;
+
+    /* Text - WCAG AA compliant */
+    --on-surface: #e6edf3;
+    --on-surface-secondary: #8b949e;
+    --on-surface-muted: #6e7681;
+
+    /* Primary accent */
+    --primary: #58a6ff;
+    --primary-dim: rgba(88, 166, 255, 0.15);
+
+    /* Semantic colors */
+    --success: #3fb950;
+    --warning: #d29922;
+    --danger: #f85149;
+    --accent-purple: #a371f7;
+    --accent-teal: #2dd4bf;
+
+    /* Borders & shadows */
+    --border-subtle: rgba(240, 246, 252, 0.1);
+    --border-default: rgba(240, 246, 252, 0.15);
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+
+    /* Typography */
+    --font-display: 'Space Grotesk', system-ui, sans-serif;
+    --font-body: 'IBM Plex Sans', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+    /* Type scale */
+    --text-xs: 10px;
+    --text-sm: 12px;
+    --text-base: 14px;
+    --text-lg: 16px;
+    --text-xl: 20px;
+    --text-2xl: 24px;
+    --text-3xl: 32px;
+    --text-4xl: 40px;
+
+    /* Radii */
+    --radius-sm: 4px;
+    --radius-md: 6px;
+    --radius-lg: 10px;
+
+    /* Easing */
+    --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+    --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--surface-lowest);
+    background-image: radial-gradient(ellipse at top, rgba(88, 166, 255, 0.03) 0%, transparent 50%);
+    color: var(--on-surface);
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--on-surface-muted); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--on-surface-secondary); }
+
+  /* ── Top Bar ── */
+  .topbar {
+    background: var(--surface-low);
+    border-bottom: 1px solid var(--border-subtle);
+    padding: 0 32px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: var(--shadow-sm);
+  }
+  .topbar-dots {
+    display: flex;
+    gap: 7px;
+  }
+  .topbar-dots span {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    transition: opacity 150ms var(--ease-out);
+  }
+  .topbar-dots span:nth-child(1) { background: #f85149; box-shadow: 0 0 6px rgba(248, 81, 73, 0.4); }
+  .topbar-dots span:nth-child(2) { background: #d29922; box-shadow: 0 0 6px rgba(210, 153, 34, 0.4); }
+  .topbar-dots span:nth-child(3) { background: #3fb950; box-shadow: 0 0 6px rgba(63, 185, 80, 0.4); }
+  .topbar-brand {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--on-surface);
+    display: flex;
+    align-items: center;
+  }
+  .topbar-brand::before {
+    content: '';
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background: var(--primary);
+    border-radius: 2px;
+    margin-right: 10px;
+    box-shadow: 0 0 12px var(--primary);
+  }
+  .topbar-nav {
+    display: flex;
+    gap: 4px;
+    margin-left: 32px;
+  }
+  .topbar-nav-item {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--on-surface-muted);
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: color 150ms var(--ease-out), border-color 150ms var(--ease-out), transform 100ms var(--ease-out);
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .topbar-nav-item:hover { color: var(--on-surface-secondary); }
+  }
+  .topbar-nav-item:active { transform: scale(0.97); }
+  .topbar-nav-item.active {
+    color: var(--on-surface);
+    border-bottom-color: var(--primary);
+  }
+  .topbar-right {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .topbar-search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--on-surface-muted);
+    background: var(--surface-container);
+    border: 1px solid var(--border-subtle);
+    padding: 6px 14px;
+    border-radius: var(--radius-md);
+  }
+  .topbar-search kbd {
+    font-size: var(--text-xs);
+    padding: 2px 6px;
+    background: var(--surface-lowest);
+    border-radius: var(--radius-sm);
+    color: var(--on-surface-muted);
+  }
+  .streak-badge {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    color: var(--warning);
+    background: rgba(210, 153, 34, 0.1);
+    border: 1px solid rgba(210, 153, 34, 0.2);
+    padding: 6px 14px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .streak-badge svg {
+    width: 14px;
+    height: 14px;
+    stroke: var(--warning);
+  }
+
+  /* ── Layout ── */
+  .shell {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    min-height: calc(100vh - 56px);
+  }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    background: var(--surface-low);
+    border-right: 1px solid var(--border-subtle);
+    padding: 24px 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .sidebar-section { padding: 0 16px; margin-bottom: 28px; }
+  .sidebar-label {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--on-surface-muted);
+    margin-bottom: 12px;
+    padding-left: 14px;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    font-weight: 500;
+    color: var(--on-surface-secondary);
+    transition: transform 160ms var(--ease-out), background 150ms var(--ease-out), color 150ms var(--ease-out), border-color 150ms var(--ease-out);
+    border-left: 2px solid transparent;
+    margin-bottom: 4px;
+  }
+  .nav-item:active { transform: scale(0.97); }
+  @media (hover: hover) and (pointer: fine) {
+    .nav-item:hover {
+      background: var(--surface-container);
+      color: var(--on-surface);
+    }
+  }
+  .nav-item.active {
+    background: var(--primary-dim);
+    color: var(--primary);
+    border-left-color: var(--primary);
+    font-weight: 600;
+    box-shadow: inset 0 0 0 1px rgba(88, 166, 255, 0.1);
+  }
+  .nav-icon {
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.7;
+    flex-shrink: 0;
+  }
+  .nav-icon svg { width: 16px; height: 16px; }
+  .nav-item.active .nav-icon { opacity: 1; }
+
+  /* Icon utility */
+  .icon { width: 16px; height: 16px; flex-shrink: 0; }
+  .icon-sm { width: 14px; height: 14px; }
+  .icon-lg { width: 20px; height: 20px; }
+  .nav-badge {
+    margin-left: auto;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    background: var(--surface-container);
+    padding: 3px 8px;
+    border-radius: var(--radius-sm);
+    color: var(--on-surface-muted);
+  }
+  .nav-item.active .nav-badge {
+    background: rgba(88, 166, 255, 0.15);
+    color: var(--primary);
+  }
+
+  /* Action Button */
+  .sidebar-action {
+    padding: 0 14px;
+    margin-top: 16px;
+    margin-bottom: auto;
+  }
+  .btn-new-analysis {
+    width: 100%;
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    padding: 12px 16px;
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    background: var(--primary);
+    color: #0a0e17;
+    transition: transform 160ms var(--ease-out), box-shadow 150ms var(--ease-out);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    will-change: transform;
+  }
+  .btn-new-analysis:active { transform: scale(0.97); }
+  @media (hover: hover) and (pointer: fine) {
+    .btn-new-analysis:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(88, 166, 255, 0.3);
+    }
+  }
+
+  /* Sidebar Footer */
+  .sidebar-footer {
+    margin-top: auto;
+    padding: 20px 16px;
+    border-top: 1px solid var(--border-subtle);
+  }
+  .sidebar-footer-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    font-size: var(--text-sm);
+    color: var(--on-surface-muted);
+    cursor: pointer;
+    border-radius: var(--radius-md);
+    transition: color 150ms var(--ease-out), background 150ms var(--ease-out);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .sidebar-footer-item:hover { color: var(--on-surface-secondary); background: var(--surface-container); }
+  }
+  .btn-io {
+    flex: 1;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    padding: 10px 0;
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    background: transparent;
+    color: var(--on-surface-muted);
+    cursor: pointer;
+    transition: transform 160ms var(--ease-out), background 150ms var(--ease-out), color 150ms var(--ease-out), border-color 150ms var(--ease-out);
+  }
+  .btn-io:active { transform: scale(0.95); }
+  @media (hover: hover) and (pointer: fine) {
+    .btn-io:hover {
+      color: var(--on-surface);
+      border-color: var(--primary);
+      background: var(--primary-dim);
+    }
+  }
+
+  /* ── Stats Panel ── */
+  .stats-panel {
+    padding: 16px;
+  }
+  .stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+  }
+  .stat-label {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--on-surface-muted);
+  }
+  .stat-value {
+    font-family: var(--font-mono);
+    font-size: var(--text-base);
+    font-weight: 600;
+    color: var(--success);
+  }
+  .progress-bar-mini {
+    width: 100%;
+    height: 6px;
+    background: var(--surface-lowest);
+    border-radius: var(--radius-sm);
+    margin-top: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border-subtle);
+  }
+  .progress-bar-mini-fill {
+    height: 100%;
+    border-radius: var(--radius-sm);
+    background: var(--primary);
+    transition: width 500ms var(--ease-in-out);
+  }
+
+  /* ── Main Content ── */
+  .main {
+    padding: 36px 44px;
+    overflow-y: auto;
+    max-height: calc(100vh - 56px);
+  }
+
+  .view { display: none; }
+  .view.active { display: block; animation: viewIn 180ms var(--ease-out); }
+  @keyframes viewIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── Section Headers ── */
+  .section-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 32px;
+  }
+  .section-header-left {}
+  .section-header-operation {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--on-surface-muted);
+    margin-bottom: 8px;
+  }
+  .section-header h2 {
+    font-family: var(--font-display);
+    font-size: var(--text-2xl);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--on-surface);
+  }
+  .section-header .tag {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 5px 12px;
+    border-radius: var(--radius-sm);
+    border: 1px solid transparent;
+  }
+  .section-header-stats {
+    display: flex;
+    gap: 1px;
+    align-self: flex-start;
+  }
+  .header-stat-box {
+    background: var(--surface-container);
+    border: 1px solid var(--border-subtle);
+    padding: 12px 20px;
+    min-width: 110px;
+  }
+  .header-stat-box:first-child { border-radius: var(--radius-md) 0 0 var(--radius-md); border-right: none; }
+  .header-stat-box:last-child { border-radius: 0 var(--radius-md) var(--radius-md) 0; }
+  .header-stat-label {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--on-surface-muted);
+    margin-bottom: 4px;
+  }
+  .header-stat-value {
+    font-family: var(--font-mono);
+    font-size: var(--text-xl);
+    font-weight: 700;
+    color: var(--on-surface);
+  }
+
+  .tag-blue { background: var(--primary-dim); color: var(--primary); border-color: rgba(88, 166, 255, 0.2); }
+  .tag-green { background: rgba(63, 185, 80, 0.1); color: var(--success); border-color: rgba(63, 185, 80, 0.2); }
+  .tag-amber { background: rgba(210, 153, 34, 0.1); color: var(--warning); border-color: rgba(210, 153, 34, 0.2); }
+  .tag-purple { background: rgba(136, 87, 229, 0.1); color: var(--accent-purple); border-color: rgba(136, 87, 229, 0.2); }
+  .tag-cyan { background: var(--primary-dim); color: var(--primary); border-color: rgba(88, 166, 255, 0.2); }
+  .tag-rose { background: rgba(219, 97, 162, 0.1); color: #db61a2; border-color: rgba(219, 97, 162, 0.2); }
+  .tag-teal { background: rgba(45, 212, 191, 0.1); color: var(--accent-teal); border-color: rgba(45, 212, 191, 0.2); }
+
+  /* ── Phase Cards (Roadmap Modules) ── */
+  .week-card {
+    background: var(--surface-container);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    margin-bottom: 14px;
+    overflow: hidden;
+    transition: transform 150ms var(--ease-out), box-shadow 150ms var(--ease-out), border-color 150ms var(--ease-out);
+    box-shadow: var(--shadow-sm);
+    will-change: transform;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .week-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+      border-color: var(--border-default);
+    }
+  }
+  .week-card.open {
+    box-shadow: var(--shadow-md);
+    border-color: var(--border-default);
+  }
+  .week-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .week-card-left { display: flex; align-items: center; gap: 16px; }
+  .week-num {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    width: 40px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-md);
+    flex-shrink: 0;
+  }
+  .week-num.s1 { background: var(--primary-dim); color: var(--primary); }
+  .week-num.s2 { background: rgba(63, 185, 80, 0.12); color: var(--success); }
+  .week-num.s3 { background: rgba(210, 153, 34, 0.12); color: var(--warning); }
+  .week-num.s4 { background: rgba(136, 87, 229, 0.12); color: var(--accent-purple); }
+  .week-num.s5 { background: rgba(219, 97, 162, 0.12); color: #db61a2; }
+  .week-num.s6 { background: var(--primary-dim); color: var(--primary); }
+  .week-title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--text-base);
+    letter-spacing: -0.01em;
+  }
+  .week-subtitle {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    color: var(--on-surface-muted);
+    margin-top: 3px;
+  }
+  .week-card-right { display: flex; align-items: center; gap: 16px; }
+  .week-progress-text {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    color: var(--on-surface-muted);
+  }
+  .week-progress-bar {
+    width: 90px;
+    height: 6px;
+    background: var(--surface-container-highest);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    flex-shrink: 0;
+    border: 1px solid var(--border-subtle);
+  }
+  .week-progress-bar-fill {
+    height: 100%;
+    border-radius: var(--radius-sm);
+    background: var(--primary);
+    transition: width 500ms var(--ease-in-out);
+  }
+  .week-progress-bar-fill.complete {
+    background: var(--success);
+  }
+  .chevron {
+    font-size: var(--text-xs);
+    color: var(--on-surface-muted);
+    transition: transform 200ms var(--ease-out);
+  }
+  .week-card.open .chevron { transform: rotate(90deg); }
+  .week-card-body { display: none; padding: 0 24px 24px; }
+  .week-card.open .week-card-body { display: block; }
+
+  /* ── Checklist Items ── */
+  .checklist-group-label {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--on-surface-muted);
+    padding: 18px 0 12px;
+  }
+  .checklist-group-label:first-child { padding-top: 4px; }
+  .check-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 12px 14px;
+    margin-bottom: 6px;
+    border-radius: var(--radius-md);
+    transition: background 150ms var(--ease-out);
+    background: var(--surface-low);
+    border: 1px solid var(--border-subtle);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .check-item:hover { background: var(--surface-container-high); }
+  }
+  .check-item input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+  }
+  .check-box {
+    width: 18px;
+    height: 18px;
+    border: 1.5px solid var(--on-surface-muted);
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: transform 160ms var(--ease-out), background 150ms var(--ease-out), border-color 150ms var(--ease-out);
+    margin-top: 2px;
+    position: relative;
+  }
+  .check-box:active { transform: scale(0.9); }
+  .check-box::after {
+    content: '';
+    display: block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #fff;
+    transform: scale(0);
+    opacity: 0;
+    transition: transform 150ms var(--ease-out), opacity 150ms var(--ease-out);
+  }
+  .check-item input:checked + .check-box {
+    background: var(--success);
+    border-color: var(--success);
+  }
+  .check-item input:checked + .check-box::after {
+    transform: scale(1);
+    opacity: 1;
+  }
+  .check-label {
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    cursor: pointer;
+    transition: color 150ms var(--ease-out);
+    flex: 1;
+    line-height: 1.55;
+    color: var(--on-surface);
+  }
+  .check-item input:checked ~ .check-label {
+    color: var(--on-surface-muted);
+    text-decoration: line-through;
+    text-decoration-color: var(--on-surface-muted);
+  }
+  .check-link {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    padding: 4px 10px;
+    border-radius: var(--radius-sm);
+    color: var(--primary);
+    background: var(--primary-dim);
+    border: 1px solid rgba(88, 166, 255, 0.15);
+    flex-shrink: 0;
+    text-decoration: none;
+    transition: transform 160ms var(--ease-out), background 150ms var(--ease-out), border-color 150ms var(--ease-out);
+    margin-top: 2px;
+    text-transform: uppercase;
+  }
+  .check-link:active { transform: scale(0.95); }
+  @media (hover: hover) and (pointer: fine) {
+    .check-link:hover { background: rgba(88, 166, 255, 0.2); border-color: rgba(88, 166, 255, 0.3); }
+  }
+
+  /* ── Resource Grid ── */
+  .resource-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+  }
+  .resource-card {
+    background: var(--surface-container);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    transition: transform 150ms var(--ease-out), box-shadow 150ms var(--ease-out), border-color 150ms var(--ease-out);
+    text-decoration: none;
+    display: block;
+    box-shadow: var(--shadow-sm);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .resource-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-md);
+      border-color: var(--border-default);
+    }
+  }
+  .resource-indicator {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-bottom: 14px;
+  }
+  .resource-indicator.section-1 { background: var(--primary); box-shadow: 0 0 8px var(--glow-primary); }
+  .resource-indicator.section-2 { background: var(--secondary); box-shadow: 0 0 8px var(--glow-secondary); }
+  .resource-indicator.section-3 { background: var(--accent-green); box-shadow: 0 0 8px var(--glow-green); }
+  .resource-indicator.section-4 { background: var(--warning); box-shadow: 0 0 8px rgba(210, 153, 34, 0.4); }
+  .resource-indicator.section-5 { background: var(--accent-pink); box-shadow: 0 0 8px var(--glow-pink); }
+  .resource-indicator.section-6 { background: var(--accent-purple); box-shadow: 0 0 8px var(--glow-purple); }
+  .resource-name { font-family: var(--font-display); font-weight: 600; font-size: var(--text-base); margin-bottom: 6px; color: var(--on-surface); }
+  .resource-desc { font-size: var(--text-sm); color: var(--on-surface-muted); line-height: 1.6; margin-bottom: 12px; }
+  .resource-link {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--primary);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: color 0.15s;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .resource-link:hover { color: var(--secondary); }
+  }
+  .resource-section-title {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--on-surface-muted);
+    margin: 32px 0 14px;
+    padding-bottom: 0;
+  }
+  .resource-section-title:first-child { margin-top: 0; }
+
+  /* ── Study Log / Notes ── */
+  .tracker-controls {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+  .tracker-controls input, .tracker-controls select, .tracker-controls textarea {
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    padding: 10px 14px;
+    background: var(--bg-input);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    color: var(--on-surface);
+    outline: none;
+    transition: border-color 150ms var(--ease-out), box-shadow 150ms var(--ease-out);
+  }
+  .tracker-controls input:focus, .tracker-controls select:focus, .tracker-controls textarea:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-dim);
+  }
+  .tracker-controls input::placeholder { color: var(--on-surface-muted); }
+  .tracker-controls input { flex: 1; min-width: 180px; }
+  .tracker-controls select { min-width: 120px; cursor: pointer; }
+  .tracker-controls select option { background: var(--surface-low); }
+
+  .btn {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    padding: 10px 18px;
+    border-radius: var(--radius-md);
+    border: none;
+    cursor: pointer;
+    transition: transform 160ms var(--ease-out), box-shadow 150ms var(--ease-out), background 150ms var(--ease-out);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn-primary {
+    background: var(--primary);
+    color: #0a0e17;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(88, 166, 255, 0.3);
+    }
+  }
+  .btn-ghost { background: transparent; color: var(--on-surface-secondary); border: 1px solid var(--border-default); }
+  @media (hover: hover) and (pointer: fine) {
+    .btn-ghost:hover { background: var(--surface-container); color: var(--on-surface); }
+  }
+  .btn-ghost:active { transform: scale(0.97); }
+  .btn-danger { background: transparent; color: var(--danger); border: 1px solid rgba(248, 81, 73, 0.2); }
+  @media (hover: hover) and (pointer: fine) {
+    .btn-danger:hover { background: rgba(248, 81, 73, 0.1); }
+  }
+  .btn-danger:active { transform: scale(0.97); }
+  .btn-sm { padding: 6px 12px; font-size: var(--text-xs); }
+
+  .table-wrap {
+    background: var(--surface-container);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+  }
+  table { width: 100%; border-collapse: collapse; font-size: var(--text-base); }
+  thead { background: var(--surface-low); }
+  th {
+    text-align: left;
+    padding: 14px 18px;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--on-surface-muted);
+  }
+  td { padding: 12px 18px; }
+  tr { transition: background 150ms var(--ease-out); }
+  tr:nth-child(even) td { background: rgba(17, 24, 39, 0.3); }
+  @media (hover: hover) and (pointer: fine) {
+    tr:hover td { background: var(--surface-container-high); }
+  }
+
+  .status-pill {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: var(--radius-sm);
+    display: inline-block;
+  }
+  .status-not-started { background: rgba(139,92,246,0.10); color: #a78bfa; }
+  .status-in-progress { background: rgba(245,158,11,0.10); color: var(--accent-amber); }
+  .status-completed { background: rgba(16,185,129,0.10); color: var(--accent-green); }
+
+  td select.inline-status {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    background: var(--surface-low);
+    border: 1px solid transparent;
+    border-radius: var(--radius-md);
+    color: var(--on-surface);
+    padding: 4px 8px;
+    cursor: pointer;
+    outline: none;
+  }
+  td select.inline-status:focus { box-shadow: 0 0 0 2px rgba(34,211,238,0.2); }
+
+  .empty-state {
+    text-align: center;
+    padding: 48px 20px;
+    color: var(--on-surface-muted);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .empty-state .empty-icon {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 12px;
+    opacity: 0.5;
+  }
+  .empty-state .empty-icon svg { width: 100%; height: 100%; }
+  .empty-state p { font-size: var(--text-sm); }
+
+  /* ── Filter Bar ── */
+  .filter-bar { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
+  .filter-chip {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 5px 14px;
+    border-radius: var(--radius-md);
+    border: none;
+    background: var(--surface-container);
+    color: var(--on-surface-muted);
+    cursor: pointer;
+    transition: background-color 200ms var(--ease-out), color 200ms var(--ease-out), transform 160ms var(--ease-out);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .filter-chip:hover { background: var(--surface-container-high); color: var(--on-surface-secondary); }
+  }
+  .filter-chip:active { transform: scale(0.97); }
+  .filter-chip.active {
+    background: var(--glow-primary);
+    color: var(--primary);
+  }
+
+  /* ── Study Notes ── */
+  .note-card {
+    background: var(--surface-container);
+    border-radius: var(--radius-md);
+    padding: 20px;
+    margin-bottom: 8px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 16px;
+    align-items: start;
+    transition: transform 250ms var(--ease-out), box-shadow 250ms var(--ease-out);
+    box-shadow: var(--shadow-md);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .note-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+  }
+  .note-section-badge {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    padding: 3px 10px;
+    border-radius: var(--radius-md);
+    min-width: 50px;
+    text-align: center;
+  }
+  .note-info h4 {
+    font-family: var(--font-display);
+    font-size: var(--text-base);
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .note-meta {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 6px;
+  }
+  .note-meta span {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--on-surface-muted);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    letter-spacing: 0.04em;
+  }
+  .note-body {
+    font-size: var(--text-sm);
+    color: var(--on-surface-secondary);
+    line-height: 1.6;
+    margin-top: 6px;
+    padding-top: 8px;
+  }
+
+  /* ── Prerequisites Graph ── */
+  .prereq-container {
+    background: var(--surface-container);
+    border-radius: var(--radius-md);
+    padding: 32px 24px;
+    overflow-x: auto;
+    position: relative;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+  }
+  .prereq-svg { width: 100%; min-width: 900px; }
+
+  /* Node animations */
+  .prereq-node {
+    cursor: pointer;
+    opacity: 0;
+    transform-origin: center;
+    transform-box: fill-box;
+    animation: prereqNodeIn 400ms var(--ease-out) forwards;
+  }
+  .prereq-node[data-col="0"] { animation-delay: 0ms; }
+  .prereq-node[data-col="1"] { animation-delay: 80ms; }
+  .prereq-node[data-col="2"] { animation-delay: 160ms; }
+  .prereq-node[data-col="3"] { animation-delay: 240ms; }
+  .prereq-node[data-col="4"] { animation-delay: 320ms; }
+  .prereq-node[data-col="5"] { animation-delay: 400ms; }
+
+  /* Skip entry animation on state updates */
+  .prereq-svg.no-entry-anim .prereq-node,
+  .prereq-svg.no-entry-anim .prereq-label {
+    animation: none;
+    opacity: 1;
+  }
+  .prereq-svg.no-entry-anim .prereq-edge {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+
+  @keyframes prereqNodeIn {
+    from { opacity: 0; transform: scale(0.9) translateY(8px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  /* Hover pulse */
+  .prereq-node rect {
+    transition: stroke 200ms var(--ease-out), fill 200ms var(--ease-out), filter 200ms var(--ease-out), transform 200ms var(--ease-out);
+    transform-origin: center;
+    transform-box: fill-box;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .prereq-node:hover rect {
+      transform: scale(1.03);
+    }
+  }
+  .prereq-node text { font-family: var(--font-mono); pointer-events: none; }
+  .prereq-node.dimmed rect { opacity: 0.15; }
+  .prereq-node.dimmed text { opacity: 0.15; }
+
+  /* Related nodes glow on hover */
+  .prereq-node.related rect {
+    filter: drop-shadow(0 0 8px currentColor);
+    animation: prereqGlowPulse 600ms var(--ease-out);
+  }
+  @keyframes prereqGlowPulse {
+    0% { filter: drop-shadow(0 0 0px currentColor); }
+    50% { filter: drop-shadow(0 0 12px currentColor); }
+    100% { filter: drop-shadow(0 0 8px currentColor); }
+  }
+
+  /* Edge animations */
+  .prereq-edge {
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000;
+    animation: prereqEdgeIn 800ms var(--ease-out) forwards;
+    animation-delay: 500ms;
+  }
+  @keyframes prereqEdgeIn {
+    to { stroke-dashoffset: 0; }
+  }
+
+  .prereq-edge.dimmed { opacity: 0.05; }
+  .prereq-edge.highlighted {
+    opacity: 1;
+    stroke-width: 2.5;
+    stroke-dasharray: 8 4;
+    animation: prereqEdgeFlow 600ms linear infinite;
+  }
+  @keyframes prereqEdgeFlow {
+    from { stroke-dashoffset: 0; }
+    to { stroke-dashoffset: -24; }
+  }
+
+  /* Section labels animation */
+  .prereq-label {
+    opacity: 0;
+    animation: prereqLabelIn 300ms var(--ease-out) forwards;
+  }
+  .prereq-label[data-col="0"] { animation-delay: 0ms; }
+  .prereq-label[data-col="1"] { animation-delay: 60ms; }
+  .prereq-label[data-col="2"] { animation-delay: 120ms; }
+  .prereq-label[data-col="3"] { animation-delay: 180ms; }
+  .prereq-label[data-col="4"] { animation-delay: 240ms; }
+  .prereq-label[data-col="5"] { animation-delay: 300ms; }
+  @keyframes prereqLabelIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* 6. Completion burst - scale up with expanding ring */
+  .prereq-node.just-completed {
+    animation: prereqCompleteBurst 500ms var(--ease-out) forwards;
+  }
+  .prereq-node.just-completed rect {
+    animation: prereqCompleteRing 600ms var(--ease-out) forwards;
+  }
+  @keyframes prereqCompleteBurst {
+    0% { transform: scale(1); }
+    30% { transform: scale(1.08); }
+    100% { transform: scale(1); }
+  }
+  @keyframes prereqCompleteRing {
+    0% { filter: drop-shadow(0 0 0px #10b981); }
+    40% { filter: drop-shadow(0 0 20px #10b981); }
+    100% { filter: drop-shadow(0 0 6px rgba(16,185,129,0.3)); }
+  }
+
+  /* 7. Unlock ripple - blue pulse for newly ready nodes */
+  .prereq-node.just-unlocked {
+    animation: prereqUnlockRipple 700ms var(--ease-out) forwards;
+  }
+  .prereq-node.just-unlocked rect {
+    animation: prereqUnlockGlow 700ms var(--ease-out) forwards;
+  }
+  @keyframes prereqUnlockRipple {
+    0% { transform: scale(1); }
+    20% { transform: scale(1.06); }
+    100% { transform: scale(1); }
+  }
+  @keyframes prereqUnlockGlow {
+    0% { filter: drop-shadow(0 0 0px #3b82f6); }
+    30% { filter: drop-shadow(0 0 16px #3b82f6); }
+    100% { filter: drop-shadow(0 0 6px rgba(59,130,246,0.2)); }
+  }
+
+  /* 8. Edge color transition */
+  .prereq-edge {
+    transition: stroke 400ms var(--ease-out), stroke-width 200ms var(--ease-out), opacity 200ms var(--ease-out);
+  }
+  .prereq-edge.state-done { stroke: rgba(16, 185, 129, 0.4); }
+  .prereq-edge.state-ready { stroke: rgba(59, 130, 246, 0.3); }
+
+  /* 9. Ready node shimmer - subtle pulsing glow */
+  .prereq-node.state-ready rect {
+    animation: prereqReadyShimmer 2.5s ease-in-out infinite;
+  }
+  @keyframes prereqReadyShimmer {
+    0%, 100% { filter: drop-shadow(0 0 4px rgba(59,130,246,0.2)); }
+    50% { filter: drop-shadow(0 0 10px rgba(59,130,246,0.4)); }
+  }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .prereq-node, .prereq-label { animation: none; opacity: 1; }
+    .prereq-node.just-completed, .prereq-node.just-unlocked { animation: none; }
+    .prereq-node.just-completed rect, .prereq-node.just-unlocked rect { animation: none; }
+    .prereq-node.state-ready rect { animation: none; filter: drop-shadow(0 0 6px rgba(59,130,246,0.2)); }
+    .prereq-edge { animation: none; stroke-dashoffset: 0; }
+    .prereq-edge.highlighted { animation: none; }
+    .prereq-node.related rect { animation: none; }
+  }
+  .prereq-legend {
+    display: flex;
+    gap: 24px;
+    margin-top: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .prereq-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: var(--text-xs);
+    color: var(--on-surface-muted);
+    font-family: var(--font-mono);
+    letter-spacing: 0.04em;
+  }
+  .prereq-dot { width: 10px; height: 10px; border-radius: var(--radius-md); }
+  .prereq-dot-pending { background: var(--surface-container-high); }
+  .prereq-dot-done { background: var(--accent-green); box-shadow: 0 0 6px var(--glow-green); }
+  .prereq-dot-ready { background: rgba(59,130,246,0.4); box-shadow: 0 0 6px var(--glow-secondary); }
+
+  /* ── Lecture Tracker ── */
+  .lecture-card {
+    background: var(--surface-container);
+    border-radius: var(--radius-md);
+    padding: 20px 24px;
+    margin-bottom: 8px;
+    transition: transform 250ms var(--ease-out), box-shadow 250ms var(--ease-out);
+    box-shadow: var(--shadow-md);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .lecture-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+  }
+  .lecture-card-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 12px;
+  }
+  .lecture-section-badge {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-md);
+    flex-shrink: 0;
+  }
+  .lecture-course-name {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--text-base);
+    flex: 1;
+  }
+  .lecture-count {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--primary);
+    letter-spacing: 0.03em;
+  }
+  .lecture-progress-wrap {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .lecture-progress-bar {
+    flex: 1;
+    height: 6px;
+    background: var(--surface-container-highest);
+    border-radius: 3px;
+    overflow: visible;
+    position: relative;
+  }
+  .lecture-progress-fill {
+    height: 100%;
+    border-radius: 3px;
+    background: var(--primary);
+    transition: width 300ms var(--ease-out);
+    position: relative;
+    box-shadow: 0 0 8px var(--glow-primary);
+  }
+  .lecture-progress-fill.complete {
+    background: var(--accent-green);
+    box-shadow: 0 0 8px var(--glow-green);
+  }
+  /* Removed infinite shimmer - constant motion violates design principles */
+  .lecture-slider-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 10px;
+  }
+  .lecture-slider {
+    flex: 1;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 16px;
+    background: transparent;
+    outline: none;
+    cursor: pointer;
+    --fill-percent: 0%;
+  }
+  .lecture-slider::-webkit-slider-runnable-track {
+    height: 6px;
+    background: linear-gradient(to right, var(--primary) 0%, var(--primary) var(--fill-percent), var(--surface-container-highest) var(--fill-percent), var(--surface-container-highest) 100%);
+    border-radius: 3px;
+  }
+  .lecture-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    background: var(--primary);
+    border-radius: 50%;
+    cursor: pointer;
+    border: 3px solid var(--surface-container);
+    margin-top: -6px;
+    transition: transform 200ms var(--ease-out), box-shadow 200ms var(--ease-out);
+    box-shadow: 0 0 8px var(--glow-primary);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .lecture-slider::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+      box-shadow: 0 0 14px var(--glow-primary);
+    }
+  }
+  .lecture-slider::-moz-range-track {
+    height: 6px;
+    background: var(--surface-container-highest);
+    border-radius: 3px;
+    border: none;
+  }
+  .lecture-slider::-moz-range-progress {
+    height: 6px;
+    background: var(--primary);
+    border-radius: 3px;
+  }
+  .lecture-slider::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    background: var(--primary);
+    border-radius: 50%;
+    cursor: pointer;
+    border: 3px solid var(--surface-container);
+    box-shadow: 0 0 8px var(--glow-primary);
+  }
+  .lecture-input {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    width: 52px;
+    text-align: center;
+    padding: 5px 4px;
+    background: var(--surface-low);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    color: var(--on-surface);
+    outline: none;
+    transition: border-color 200ms var(--ease-out), box-shadow 200ms var(--ease-out);
+  }
+  .lecture-input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(34,211,238,0.2);
+  }
+  .lecture-total {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--on-surface-muted);
+    letter-spacing: 0.04em;
+  }
+  .lecture-section-group { margin-bottom: 28px; }
+  .lecture-section-group-title {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--on-surface-muted);
+    margin-bottom: 12px;
+    padding-bottom: 0;
+  }
+
+  /* ── Papers Reading List ── */
+  .papers-section-group { margin-bottom: 28px; }
+  .papers-section-group-title {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--on-surface-muted);
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .papers-section-count {
+    font-size: var(--text-xs);
+    color: var(--primary);
+    font-weight: 600;
+  }
+  .paper-card {
+    background: var(--surface-container);
+    border-radius: var(--radius-md);
+    padding: 18px 22px;
+    margin-bottom: 8px;
+    transition: transform 250ms var(--ease-out), box-shadow 250ms var(--ease-out);
+    box-shadow: var(--shadow-md);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .paper-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+  }
+  .paper-card label.check-item { padding: 0; background: transparent !important; }
+  .paper-title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--text-sm);
+    display: block;
+  }
+  .paper-authors {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--primary);
+    margin-top: 3px;
+    display: block;
+    letter-spacing: 0.02em;
+  }
+  .paper-detail {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    color: var(--on-surface-muted);
+    margin-top: 5px;
+    line-height: 1.6;
+    display: block;
+  }
+
+  /* ── Glass Module (for featured elements) ── */
+  .glass-module {
+    background: rgba(26, 34, 54, 0.65);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: var(--radius-md);
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .glass-module::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    border-radius: var(--radius-md);
+    border: 1px solid transparent;
+    background: linear-gradient(135deg, rgba(255,255,255,0.05), transparent) border-box;
+    -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  /* ── Toast ── */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: rgba(26, 34, 54, 0.85);
+    backdrop-filter: blur(12px);
+    color: var(--on-surface);
+    padding: 10px 18px;
+    border-radius: var(--radius-md);
+    font-size: var(--text-sm);
+    font-family: var(--font-mono);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    z-index: 1000;
+    opacity: 0;
+    transform: translateY(10px) scale(0.95);
+    transition: opacity 250ms var(--ease-out), transform 250ms var(--ease-out);
+    pointer-events: none;
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .toast.show { opacity: 1; transform: translateY(0) scale(1); }
+
+  /* ── Export Modal ── */
+  .export-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 900;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none;
+    transition: opacity 200ms ease;
+  }
+  .export-overlay.open { opacity: 1; pointer-events: all; }
+  .export-modal {
+    background: var(--surface-container);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-lg);
+    padding: 28px 28px 24px;
+    width: 420px;
+    max-width: calc(100vw - 32px);
+    box-shadow: var(--shadow-lg);
+    transform: translateY(8px) scale(0.98);
+    transition: transform 220ms var(--ease-out);
+  }
+  .export-overlay.open .export-modal { transform: translateY(0) scale(1); }
+  .export-modal-title {
+    font-family: var(--font-mono);
+    font-size: var(--text-base);
+    font-weight: 600;
+    color: var(--on-surface);
+    margin-bottom: 4px;
+    letter-spacing: 0.03em;
+  }
+  .export-modal-subtitle {
+    font-size: var(--text-sm);
+    color: var(--on-surface-secondary);
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+  .export-field-label {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--on-surface-muted);
+    margin-bottom: 6px;
+  }
+  .export-filename-input {
+    width: 100%;
+    background: var(--bg-input);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    color: var(--on-surface);
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    padding: 9px 12px;
+    outline: none;
+    transition: border-color 150ms ease;
+  }
+  .export-filename-input:focus { border-color: var(--primary); }
+  .export-hint {
+    font-size: var(--text-xs);
+    color: var(--on-surface-muted);
+    margin-top: 8px;
+    line-height: 1.5;
+  }
+  .export-modal-actions {
+    display: flex; gap: 10px; justify-content: flex-end;
+    margin-top: 22px;
+  }
+  .export-btn-cancel {
+    padding: 8px 16px;
+    background: transparent;
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    color: var(--on-surface-secondary);
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    cursor: pointer;
+    transition: border-color 150ms ease, color 150ms ease;
+  }
+  .export-btn-cancel:hover { border-color: var(--on-surface-secondary); color: var(--on-surface); }
+  .export-btn-download {
+    padding: 8px 18px;
+    background: var(--primary);
+    border: none;
+    border-radius: var(--radius-md);
+    color: #0d1117;
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 6px;
+    transition: opacity 150ms ease;
+  }
+  .export-btn-download:hover { opacity: 0.88; }
+
+  /* ── Responsive ── */
+  @media (max-width: 800px) {
+    .shell { grid-template-columns: 1fr; }
+    .sidebar {
+      border-right: none;
+      padding: 10px 0;
+      flex-direction: row;
+      overflow-x: auto;
+      gap: 4px;
+    }
+    .sidebar-section { padding: 0 8px; margin-bottom: 0; display: flex; gap: 4px; }
+    .sidebar-label { display: none; }
+    .sidebar-action, .sidebar-footer, .stats-panel { display: none; }
+    .nav-item { white-space: nowrap; padding: 7px 10px; font-size: var(--text-sm); border-left: none; border-bottom: 2px solid transparent; }
+    .nav-item.active { border-left-color: transparent; border-bottom-color: var(--primary); }
+    .main { padding: 20px 16px; max-height: none; }
+    .resource-grid { grid-template-columns: 1fr; }
+    .section-header { flex-direction: column; gap: 12px; }
+    .section-header-stats { align-self: stretch; }
+    .topbar-nav, .topbar-search { display: none; }
+  }
+
+  /* ── Stagger Animations ── */
+  @keyframes staggerFadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .roadmap-card,
+  .resource-card,
+  .lecture-card,
+  .paper-card,
+  .note-card {
+    animation: staggerFadeIn 300ms var(--ease-out) backwards;
+  }
+
+  .roadmap-card:nth-child(1), .resource-card:nth-child(1), .lecture-card:nth-child(1), .paper-card:nth-child(1), .note-card:nth-child(1) { animation-delay: 0ms; }
+  .roadmap-card:nth-child(2), .resource-card:nth-child(2), .lecture-card:nth-child(2), .paper-card:nth-child(2), .note-card:nth-child(2) { animation-delay: 40ms; }
+  .roadmap-card:nth-child(3), .resource-card:nth-child(3), .lecture-card:nth-child(3), .paper-card:nth-child(3), .note-card:nth-child(3) { animation-delay: 80ms; }
+  .roadmap-card:nth-child(4), .resource-card:nth-child(4), .lecture-card:nth-child(4), .paper-card:nth-child(4), .note-card:nth-child(4) { animation-delay: 120ms; }
+  .roadmap-card:nth-child(5), .resource-card:nth-child(5), .lecture-card:nth-child(5), .paper-card:nth-child(5), .note-card:nth-child(5) { animation-delay: 160ms; }
+  .roadmap-card:nth-child(6), .resource-card:nth-child(6), .lecture-card:nth-child(6), .paper-card:nth-child(6), .note-card:nth-child(6) { animation-delay: 200ms; }
+  .roadmap-card:nth-child(n+7), .resource-card:nth-child(n+7), .lecture-card:nth-child(n+7), .paper-card:nth-child(n+7), .note-card:nth-child(n+7) { animation-delay: 240ms; }
+
+  /* ── Accessibility: Reduced Motion ── */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+    .view.active { animation: none; }
+    .roadmap-card, .resource-card, .lecture-card, .paper-card, .note-card { animation: none; }
+  }
+
+  /* ── Activity Heatmap ── */
+  .heatmap-wrap { background: var(--surface-container); border: 1px solid var(--border-subtle); border-radius: 10px; padding: 20px; margin-bottom: 24px; }
+  .heatmap-scroll { overflow-x: auto; }
+  .heatmap-inner { display: inline-flex; flex-direction: column; gap: 4px; }
+  .heatmap-month-row { display: flex; align-items: flex-end; gap: 3px; margin-bottom: 2px; }
+  .heatmap-day-spacer { width: 28px; flex-shrink: 0; }
+  .heatmap-month-label { width: 15px; flex-shrink: 0; font-family: var(--font-mono); font-size: 9px; color: var(--on-surface-muted); overflow: visible; white-space: nowrap; }
+  .heatmap-body-row { display: flex; gap: 4px; }
+  .heatmap-day-labels { display: flex; flex-direction: column; gap: 3px; width: 24px; flex-shrink: 0; align-items: flex-end; }
+  .heatmap-day-label { height: 12px; font-family: var(--font-mono); font-size: 9px; color: var(--on-surface-muted); line-height: 12px; }
+  .heatmap-weeks { display: flex; gap: 3px; }
+  .heatmap-week { display: flex; flex-direction: column; gap: 3px; }
+  .heatmap-cell { width: 12px; height: 12px; border-radius: 2px; flex-shrink: 0; cursor: default; }
+  .heatmap-cell[data-level="0"] { background: var(--surface-container-high); }
+  .heatmap-cell[data-level="1"] { background: rgba(88,166,255,0.25); }
+  .heatmap-cell[data-level="2"] { background: rgba(88,166,255,0.5); }
+  .heatmap-cell[data-level="3"] { background: rgba(88,166,255,0.75); }
+  .heatmap-cell[data-level="4"] { background: #58a6ff; }
+  .heatmap-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; font-family: var(--font-mono); font-size: 10px; color: var(--on-surface-muted); }
+  .heatmap-legend { display: flex; align-items: center; gap: 3px; }
+  .heatmap-tooltip { position: fixed; background: var(--surface-container-high); border: 1px solid var(--border-default); border-radius: 6px; padding: 5px 9px; font-family: var(--font-mono); font-size: 11px; color: var(--on-surface); pointer-events: none; white-space: nowrap; z-index: 9999; display: none; box-shadow: var(--shadow-md); }
+</style>
+</head>
+<body>
+
+<!-- SVG Icon Sprite -->
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+  <symbol id="icon-roadmap" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3V6z"/><path d="M9 3v15"/><path d="M15 6v15"/>
+  </symbol>
+  <symbol id="icon-edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+  </symbol>
+  <symbol id="icon-link" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+  </symbol>
+  <symbol id="icon-video" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+  </symbol>
+  <symbol id="icon-file-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 15l2 2 4-4"/>
+  </symbol>
+  <symbol id="icon-file-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/>
+  </symbol>
+  <symbol id="icon-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+  </symbol>
+  <symbol id="icon-book-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+  </symbol>
+  <symbol id="icon-settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+  </symbol>
+  <symbol id="icon-flame" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.07-2.14 0-5.5 3-7 .5 2.5 2 4.9 4 6.5 3 2.5 3 6.5 0 10a7 7 0 1 1-8.5-4z"/>
+  </symbol>
+  <symbol id="icon-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+  </symbol>
+  <symbol id="icon-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="20 6 9 17 4 12"/>
+  </symbol>
+  <symbol id="icon-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+  </symbol>
+  <symbol id="icon-inbox" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>
+  </symbol>
+</svg>
+
+<!-- Top Bar -->
+<div class="topbar">
+  <div class="topbar-dots"><span></span><span></span><span></span></div>
+  <div class="topbar-brand">QUANT_OS</div>
+  <div class="topbar-nav">
+    <button class="topbar-nav-item active" data-topnav="roadmap" onclick="switchView('roadmap'); setTopNav(this)">Roadmap</button>
+    <button class="topbar-nav-item" data-topnav="tracker" onclick="switchView('tracker'); setTopNav(this)">Study Log</button>
+    <button class="topbar-nav-item" data-topnav="prereqs" onclick="switchView('prereqs'); setTopNav(this)">Prerequisites</button>
+  </div>
+  <div class="topbar-right">
+    <div class="streak-badge"><svg class="icon-sm"><use href="#icon-flame"/></svg> <span id="streakCount">0</span>-day streak</div>
+  </div>
+</div>
+
+<div class="shell">
+  <!-- Sidebar -->
+  <nav class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Navigation</div>
+      <div class="nav-item active" data-view="roadmap" onclick="switchView('roadmap')">
+        <span class="nav-icon"><svg><use href="#icon-roadmap"/></svg></span> Roadmap
+        <span class="nav-badge" id="roadmapBadge">0/0</span>
+      </div>
+      <div class="nav-item" data-view="tracker" onclick="switchView('tracker')">
+        <span class="nav-icon"><svg><use href="#icon-edit"/></svg></span> Study Log
+        <span class="nav-badge" id="trackerBadge">0</span>
+      </div>
+      <div class="nav-item" data-view="prereqs" onclick="switchView('prereqs')">
+        <span class="nav-icon"><svg><use href="#icon-link"/></svg></span> Prerequisites
+      </div>
+      <div class="nav-item" data-view="lectures" onclick="switchView('lectures')">
+        <span class="nav-icon"><svg><use href="#icon-video"/></svg></span> Lectures
+        <span class="nav-badge" id="lectureBadge">0%</span>
+      </div>
+      <div class="nav-item" data-view="assignments" onclick="switchView('assignments')">
+        <span class="nav-icon"><svg><use href="#icon-file-check"/></svg></span> Assignments
+        <span class="nav-badge" id="assignmentBadge">0%</span>
+      </div>
+      <div class="nav-item" data-view="papers" onclick="switchView('papers')">
+        <span class="nav-icon"><svg><use href="#icon-file-text"/></svg></span> Papers
+        <span class="nav-badge" id="papersBadge">0/0</span>
+      </div>
+      <div class="nav-item" data-view="resources" onclick="switchView('resources')">
+        <span class="nav-icon"><svg><use href="#icon-book"/></svg></span> Resources
+      </div>
+    </div>
+
+    <div class="stats-panel">
+      <div class="sidebar-label">System Status</div>
+      <div class="stat-row">
+        <span class="stat-label">Courses Done</span>
+        <span class="stat-value" id="totalDone">0</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Sessions Logged</span>
+        <span class="stat-value" id="totalSessions">0</span>
+      </div>
+      <div class="progress-bar-mini">
+        <div class="progress-bar-mini-fill" id="overallBar" style="width:0%"></div>
+      </div>
+    </div>
+
+    <div class="sidebar-footer">
+      <div style="display:flex;gap:8px;margin-bottom:10px;">
+        <button class="btn-io" onclick="exportData()">↓ Export</button>
+        <button class="btn-io" onclick="document.getElementById('importFile').click()">↑ Import</button>
+        <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(this)">
+      </div>
+      <div class="sidebar-footer-item"><svg class="icon-sm"><use href="#icon-book-open"/></svg> Documentation</div>
+      <div class="sidebar-footer-item"><svg class="icon-sm"><use href="#icon-settings"/></svg> Support</div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="main">
+
+    <!-- ═══ ROADMAP VIEW ═══ -->
+    <div class="view active" id="view-roadmap">
+      <div class="section-header">
+        <div class="section-header-left">
+          <div class="section-header-operation">OPERATION: ALPHA_STREAM</div>
+          <h2>Quantitative Finance Roadmap</h2>
+        </div>
+        <div class="section-header-stats">
+          <div class="header-stat-box">
+            <div class="header-stat-label">Global Progress</div>
+            <div class="header-stat-value" id="globalProgressPct">0%</div>
+          </div>
+          <div class="header-stat-box">
+            <div class="header-stat-label">Active Phase</div>
+            <div class="header-stat-value" id="activePhaseLabel">P_01</div>
+          </div>
+        </div>
+      </div>
+      <div class="heatmap-wrap"><div id="heatmapGrid"></div></div>
+      <div id="sectionCards"></div>
+    </div>
+
+    <!-- ═══ STUDY LOG VIEW ═══ -->
+    <div class="view" id="view-tracker">
+      <div class="section-header">
+        <div class="section-header-left">
+          <div class="section-header-operation">MODULE: STUDY_LOGGER</div>
+          <h2>Study Log</h2>
+        </div>
+        <span class="tag tag-amber" id="logCountTag">0 sessions</span>
+      </div>
+
+      <div class="tracker-controls">
+        <input type="text" id="logTopic" placeholder="Topic (e.g. Ito's Lemma, Black-Scholes Derivation)">
+        <select id="logSection">
+          <option value="§1 Foundational Math">§1 Foundational Math</option>
+          <option value="§2 Probability Bridge">§2 Probability Bridge</option>
+          <option value="§3 Data & Prediction">§3 Data & Prediction</option>
+          <option value="§4 Numerical Methods">§4 Numerical Methods</option>
+          <option value="§5 Finance Applications">§5 Finance Applications</option>
+          <option value="§6 Advanced Capstones">§6 Advanced Capstones</option>
+          <option value="Technical Mastery">Technical Mastery</option>
+        </select>
+        <input type="text" id="logDuration" placeholder="Duration (e.g. 2h)" style="max-width:110px;">
+        <select id="logStatus">
+          <option value="Not Started">Not Started</option>
+          <option value="In Progress">In Progress</option>
+          <option value="Completed">Completed</option>
+        </select>
+        <button class="btn btn-primary" onclick="addLog()">+ LOG</button>
+      </div>
+      <div class="tracker-controls" style="margin-top:-6px">
+        <input type="text" id="logNotes" placeholder="Notes — key insights, formulas, what clicked, what's still fuzzy..." style="flex:1;min-width:100%;">
+      </div>
+
+      <div class="filter-bar">
+        <button class="filter-chip active" data-filter="all" onclick="filterLogs('all', this)">All</button>
+        <button class="filter-chip" data-filter="Not Started" onclick="filterLogs('Not Started', this)">Not Started</button>
+        <button class="filter-chip" data-filter="In Progress" onclick="filterLogs('In Progress', this)">In Progress</button>
+        <button class="filter-chip" data-filter="Completed" onclick="filterLogs('Completed', this)">Completed</button>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:36px">#</th>
+              <th>Topic</th>
+              <th>Section</th>
+              <th>Duration</th>
+              <th>Status</th>
+              <th style="width:70px">Action</th>
+            </tr>
+          </thead>
+          <tbody id="logsBody"></tbody>
+        </table>
+        <div class="empty-state" id="emptyTracker">
+          <div class="empty-icon"><svg><use href="#icon-inbox"/></svg></div>
+          <p>No study sessions logged yet. Start learning and log your first session!</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ PREREQUISITES GRAPH VIEW ═══ -->
+    <div class="view" id="view-prereqs">
+      <div class="section-header">
+        <div class="section-header-left">
+          <div class="section-header-operation">MODULE: DEPENDENCY_GRAPH</div>
+          <h2>Prerequisites Graph</h2>
+        </div>
+        <span class="tag tag-teal">Course Dependencies</span>
+      </div>
+      <p style="font-size:12.5px;color:var(--on-surface-secondary);margin-bottom:20px;line-height:1.6;">
+        Hover over a course to highlight its prerequisites and what it unlocks. Completed courses (checked in Roadmap) appear in green.
+      </p>
+      <div id="prereqGraph" class="prereq-container"></div>
+      <div class="prereq-legend">
+        <span class="prereq-legend-item"><span class="prereq-dot prereq-dot-pending"></span> Not started</span>
+        <span class="prereq-legend-item"><span class="prereq-dot prereq-dot-done"></span> Completed</span>
+        <span class="prereq-legend-item"><span class="prereq-dot prereq-dot-ready"></span> Ready to start</span>
+      </div>
+    </div>
+
+    <!-- ═══ LECTURE TRACKER VIEW ═══ -->
+    <div class="view" id="view-lectures">
+      <div class="section-header">
+        <div class="section-header-left">
+          <div class="section-header-operation">MODULE: LECTURE_PROGRESS</div>
+          <h2>Lecture Tracker</h2>
+        </div>
+        <span class="tag tag-rose" id="lectureOverallTag">0 / 18 courses started</span>
+      </div>
+      <p style="font-size:12.5px;color:var(--on-surface-secondary);margin-bottom:20px;line-height:1.6;">
+        Track your lecture-by-lecture progress through each MIT OCW course. Use the slider or type the lecture number directly.
+      </p>
+      <div id="lectureCards"></div>
+    </div>
+
+    <!-- ═══ ASSIGNMENT TRACKER VIEW ═══ -->
+    <div class="view" id="view-assignments">
+      <div class="section-header">
+        <div class="section-header-left">
+          <div class="section-header-operation">MODULE: ASSIGNMENT_TRACKER</div>
+          <h2>Assignment Tracker</h2>
+        </div>
+        <span class="tag tag-amber" id="assignmentOverallTag">0 / 18 courses started</span>
+      </div>
+      <p style="font-size:12.5px;color:var(--on-surface-secondary);margin-bottom:20px;line-height:1.6;">
+        Track your problem set progress for each MIT OCW course. Counts are based on the assignments available on each course's OCW page.
+      </p>
+      <div id="assignmentCards"></div>
+    </div>
+
+    <!-- ═══ PAPERS VIEW ═══ -->
+    <div class="view" id="view-papers">
+      <div class="section-header">
+        <div class="section-header-left">
+          <div class="section-header-operation">MODULE: READING_LIST</div>
+          <h2>Essential Papers</h2>
+        </div>
+        <span class="tag tag-purple" id="papersTag">Quant Finance Reading List</span>
+      </div>
+      <p style="font-size:12.5px;color:var(--on-surface-secondary);margin-bottom:20px;line-height:1.6;">
+        The foundational research papers every aspiring quant should read. Organized by topic area — check them off as you work through them.
+      </p>
+      <div id="papersCards"></div>
+    </div>
+
+    <!-- ═══ RESOURCES VIEW ═══ -->
+    <div class="view" id="view-resources">
+      <div class="section-header">
+        <div class="section-header-left">
+          <div class="section-header-operation">MODULE: RESOURCE_INDEX</div>
+          <h2>MIT OCW Resources</h2>
+        </div>
+        <span class="tag tag-purple">All Course Links</span>
+      </div>
+      <div id="resourcesContainer"></div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Toast -->
+<div class="export-overlay" id="exportOverlay" onclick="handleOverlayClick(event)">
+  <div class="export-modal">
+    <div class="export-modal-title">Export Progress</div>
+    <div class="export-modal-subtitle">Your data will be saved as a JSON file.</div>
+    <div class="export-field-label">Filename</div>
+    <input class="export-filename-input" id="exportFilename" type="text" spellcheck="false" />
+    <div class="export-hint">A save dialog will open so you can choose where to store the file.</div>
+    <div class="export-modal-actions">
+      <button class="export-btn-cancel" onclick="closeExportModal()">Cancel</button>
+      <button class="export-btn-download" onclick="confirmExport()">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 1v9m0 0L5 7m3 3 3-3M2 13h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Download
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════
+// DATA: Roadmap
+// ══════════════════════════════════════════
+const ROADMAP = [
+  {
+    section: 1,
+    title: "Foundational Math",
+    subtitle: "Linear Algebra · Multivariable Calculus · Differential Equations",
+    cls: "s1",
+    description: "Before starting, ensure you can solve final exam problems from these core courses.",
+    groups: [
+      { label: "Core Courses", items: [
+        { text: "18.06 — Linear Algebra: Eigenvalues/Eigenvectors, Positive Definite Matrices, Quadratic Forms (x^T A x)", link: "https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/" },
+        { text: "18.02 — Multivariable Calculus: Partial Derivatives, Chain Rule, Lagrange Multipliers", link: "https://ocw.mit.edu/courses/18-02-multivariable-calculus-fall-2007/" },
+        { text: "18.03 — Differential Equations: ODEs, Heat Equation Basics, Boundary Value Problems", link: "https://ocw.mit.edu/courses/18-03-differential-equations-spring-2010/" },
+      ]}
+    ]
+  },
+  {
+    section: 2,
+    title: "The Probability Bridge",
+    subtitle: "Probability · Stochastic Processes · Brownian Motion · Real Analysis",
+    cls: "s2",
+    description: "Master these to understand the \"Why\" behind stochastic financial models.",
+    groups: [
+      { label: "Advanced Probability", items: [
+        { text: "18.600 — Probability and Random Variables: Central Limit Theorem, Normal vs. Log-normal Distributions, Laws of Large Numbers", link: "https://ocw.mit.edu/courses/18-600-probability-and-random-variables-fall-2019/" },
+        { text: "18.445 — Introduction to Stochastic Processes: Markov Chains, Martingales, Brownian Motion (Essential for Ito Calculus)", link: "https://ocw.mit.edu/courses/18-445-introduction-to-stochastic-processes-spring-2015/" },
+      ]},
+      { label: "Foundational Analysis", items: [
+        { text: "18.100C — Real Analysis: Riemann Integration, Continuity (Foundational for Graduate Stochastics)", link: "https://ocw.mit.edu/courses/18-100c-real-analysis-fall-2012/" },
+      ]}
+    ]
+  },
+  {
+    section: 3,
+    title: "Data & Prediction",
+    subtitle: "Statistics · Econometrics · Machine Learning",
+    cls: "s3",
+    description: "Moving from pure theory to real-world data and machine learning.",
+    groups: [
+      { label: "Statistical Foundations", items: [
+        { text: "15.075J — Statistical Thinking and Data Analysis: Regression, Hypothesis Testing, Real-world Data", link: "https://ocw.mit.edu/courses/15-075j-statistical-thinking-and-data-analysis-fall-2011/" },
+        { text: "14.382 — Econometrics: Time Series Analysis, GARCH Models (Volatility Modeling), Autoregressive Models", link: "https://ocw.mit.edu/courses/14-382-econometrics-spring-2017/" },
+      ]},
+      { label: "Machine Learning", items: [
+        { text: "6.036 — Introduction to Machine Learning: Linear Classifiers, Neural Networks, Reinforcement Learning", link: "https://ocw.mit.edu/courses/6-036-introduction-to-machine-learning-fall-2020/" },
+      ]}
+    ]
+  },
+  {
+    section: 4,
+    title: "Numerical Methods & Optimization",
+    subtitle: "Numerical Analysis · Optimization · Monte Carlo · Ito Calculus",
+    cls: "s4",
+    description: "The computational side: Solving complex equations and finding \"best\" solutions.",
+    groups: [
+      { label: "Computation & Optimization", items: [
+        { text: "18.330 — Introduction to Numerical Analysis: Solving Complex Math Equations Using Algorithms and Computer Simulations", link: "https://ocw.mit.edu/courses/18-330-introduction-to-numerical-analysis-spring-2012/" },
+        { text: "15.093J — Optimization Methods: Finding the \"Best\" Solution Under Constraints (Essential for Portfolio Management)", link: "https://ocw.mit.edu/courses/15-093j-optimization-methods-fall-2009/" },
+        { text: "15.450 — Analytics of Finance: Monte Carlo Simulation, Stochastic (Ito) Calculus, Numerical Dynamic Programming", link: "https://ocw.mit.edu/courses/15-450-analytics-of-finance-fall-2010/" },
+      ]}
+    ]
+  },
+  {
+    section: 5,
+    title: "Target Finance Applications",
+    subtitle: "CAPM · Black-Scholes · Portfolio Theory · Risk Management",
+    cls: "s5",
+    description: "Applying the math to markets, options pricing, and asset management.",
+    groups: [
+      { label: "Core Finance", items: [
+        { text: "15.401 — Finance Theory I: Capital Asset Pricing Model (CAPM), Arbitrage, Efficient Market Hypothesis", link: "https://ocw.mit.edu/courses/15-401-finance-theory-i-fall-2008/" },
+        { text: "18.S096 — Topics in Mathematics with Applications in Finance: Binomial Trees, Black-Scholes Formula, Portfolio Theory, Risk Management", link: "https://ocw.mit.edu/courses/18-s096-topics-in-mathematics-with-applications-in-finance-fall-2013/" },
+        { text: "15.433 — Investments: Active Portfolio Management, Hedge Fund Strategies, Credit Risk", link: "https://ocw.mit.edu/courses/15-433-investments-spring-2003/" },
+      ]}
+    ]
+  },
+  {
+    section: 6,
+    title: "Advanced & Modern Capstones",
+    subtitle: "Bond Math · HFT · Measure Theory · FinTech",
+    cls: "s6",
+    description: "The \"Core Quant\" level: Measure theory, high-frequency trading, and industry practice.",
+    groups: [
+      { label: "Advanced Finance", items: [
+        { text: "18.642 — Topics in Mathematics with Applications in Finance (Updated): Bond Math, Term Structure Models (HJM), Factor Modeling", link: "https://ocw.mit.edu/courses/18-642-topics-in-mathematics-with-applications-in-finance-fall-2024/" },
+        { text: "15.S08 — FinTech: Shaping the Financial World: AI in Finance, Market Microstructure (HFT), Blockchain", link: "https://ocw.mit.edu/courses/15-s08-fintech-shaping-the-financial-world-spring-2020/" },
+      ]},
+      { label: "Graduate Mathematics", items: [
+        { text: "15.070J — Advanced Stochastic Processes: Measure-Theoretic Probability, Continuous-Time Martingales", link: "https://ocw.mit.edu/courses/15-070j-advanced-stochastic-processes-fall-2013/" },
+      ]}
+    ]
+  }
+];
+
+// ══════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════
+let checklistState = JSON.parse(localStorage.getItem('qf_checklist') || '{}');
+let studyLogs = JSON.parse(localStorage.getItem('qf_logs') || '[]');
+let streak = parseInt(localStorage.getItem('qf_streak') || '0');
+let lastVisit = localStorage.getItem('qf_last_visit') || '';
+let currentFilter = 'all';
+
+// ── Streak ──
+function updateStreak() {
+  const today = new Date().toISOString().split('T')[0];
+  if (lastVisit === '') {
+    streak = 1;
+  } else if (lastVisit === today) {
+    // same day
+  } else {
+    const last = new Date(lastVisit);
+    const now = new Date(today);
+    const diff = (now - last) / (1000 * 60 * 60 * 24);
+    streak = diff <= 1 ? streak + 1 : 1;
+  }
+  lastVisit = today;
+  localStorage.setItem('qf_streak', streak);
+  localStorage.setItem('qf_last_visit', lastVisit);
+  document.getElementById('streakCount').textContent = streak;
+}
+updateStreak();
+
+// ══════════════════════════════════════════
+// RENDER: Roadmap
+// ══════════════════════════════════════════
+let openPhases = new Set([0]); // track which phase cards are open
+
+function buildRoadmap() {
+  const container = document.getElementById('sectionCards');
+  
+  // Preserve open state from existing cards before rebuild
+  container.querySelectorAll('.week-card').forEach((card, idx) => {
+    if (card.classList.contains('open')) openPhases.add(idx);
+    else openPhases.delete(idx);
+  });
+  
+  container.innerHTML = '';
+  let totalItems = 0, totalChecked = 0;
+
+  ROADMAP.forEach((sec, si) => {
+    const card = document.createElement('div');
+    card.className = 'week-card' + (openPhases.has(si) ? ' open' : '');
+
+    let bodyHTML = '';
+    if (sec.description) {
+      bodyHTML += `<p style="font-size:12.5px;color:var(--on-surface-muted);margin-bottom:14px;line-height:1.6;font-style:italic;">${sec.description}</p>`;
+    }
+
+    let secItems = 0, secChecked = 0;
+
+    sec.groups.forEach(group => {
+      bodyHTML += `<div class="checklist-group-label">${group.label}</div>`;
+      group.items.forEach((item, ii) => {
+        const key = `s${si}_${group.label}_${ii}`;
+        const checked = checklistState[key] || false;
+        if (checked) { secChecked++; totalChecked++; }
+        secItems++; totalItems++;
+        bodyHTML += `
+          <label class="check-item">
+            <input type="checkbox" data-key="${key}" ${checked ? 'checked' : ''} onchange="toggleCheck(this)">
+            <span class="check-box"></span>
+            <span class="check-label">${escapeHtml(item.text)}</span>
+            <a class="check-link" href="${item.link}" target="_blank" rel="noopener" onclick="event.stopPropagation()">OCW →</a>
+          </label>`;
+      });
+    });
+
+    const secPct = secItems > 0 ? Math.round((secChecked / secItems) * 100) : 0;
+    const isComplete = secPct === 100;
+
+    card.innerHTML = `
+      <div class="week-card-header" onclick="togglePhaseCard(this.parentElement, ${si})">
+        <div class="week-card-left">
+          <div class="week-num ${sec.cls}">§${sec.section}</div>
+          <div>
+            <div class="week-title">Phase ${sec.section}: ${sec.title}</div>
+            <div class="week-subtitle">${sec.subtitle}</div>
+          </div>
+        </div>
+        <div class="week-card-right">
+          <div class="week-progress-bar">
+            <div class="week-progress-bar-fill${isComplete ? ' complete' : ''}" style="width:${secPct}%"></div>
+          </div>
+          <span class="week-progress-text">${secChecked}/${secItems}</span>
+          <span class="chevron">▶</span>
+        </div>
+      </div>
+      <div class="week-card-body">${bodyHTML}</div>`;
+    container.appendChild(card);
+  });
+
+  document.getElementById('roadmapBadge').textContent = `${totalChecked}/${totalItems}`;
+  document.getElementById('totalDone').textContent = totalChecked;
+  document.getElementById('overallBar').style.width = totalItems > 0 ? (totalChecked / totalItems * 100) + '%' : '0%';
+
+  // Update header stats
+  const globalPct = totalItems > 0 ? Math.round((totalChecked / totalItems) * 100) : 0;
+  document.getElementById('globalProgressPct').textContent = globalPct + '%';
+
+  // Find active phase
+  let activePhase = 'P_01';
+  for (let i = 0; i < ROADMAP.length; i++) {
+    let allDone = true;
+    let secIdx = i;
+    ROADMAP[i].groups.forEach(group => {
+      group.items.forEach((item, ii) => {
+        const key = `s${secIdx}_${group.label}_${ii}`;
+        if (!checklistState[key]) allDone = false;
+      });
+    });
+    if (!allDone) { activePhase = `P_0${i + 1}`; break; }
+    if (i === ROADMAP.length - 1 && allDone) activePhase = 'DONE';
+  }
+  document.getElementById('activePhaseLabel').textContent = activePhase;
+}
+
+function togglePhaseCard(card, idx) {
+  card.classList.toggle('open');
+  if (card.classList.contains('open')) openPhases.add(idx);
+  else openPhases.delete(idx);
+}
+
+function toggleCheck(el) {
+  checklistState[el.dataset.key] = el.checked;
+  localStorage.setItem('qf_checklist', JSON.stringify(checklistState));
+  updateActivity(el.checked ? 1 : -1);
+  renderHeatmap();
+  buildRoadmap();
+  buildPrereqGraph();
+}
+
+// ══════════════════════════════════════════
+// RENDER: Study Log
+// ══════════════════════════════════════════
+function renderLogs() {
+  const tbody = document.getElementById('logsBody');
+  const empty = document.getElementById('emptyTracker');
+
+  const filtered = currentFilter === 'all' ? studyLogs : studyLogs.filter(l => l.status === currentFilter);
+
+  if (studyLogs.length === 0) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    document.getElementById('trackerBadge').textContent = '0';
+    document.getElementById('logCountTag').textContent = '0 sessions';
+    document.getElementById('totalSessions').textContent = '0';
+    return;
+  }
+
+  empty.style.display = 'none';
+  const completedCount = studyLogs.filter(l => l.status === 'Completed').length;
+  document.getElementById('trackerBadge').textContent = studyLogs.length;
+  document.getElementById('logCountTag').textContent = completedCount + ' completed';
+  document.getElementById('totalSessions').textContent = studyLogs.length;
+
+  tbody.innerHTML = filtered.map((l, i) => {
+    const realIdx = studyLogs.indexOf(l);
+    const statusClass = l.status === 'Not Started' ? 'status-not-started' : l.status === 'In Progress' ? 'status-in-progress' : 'status-completed';
+    return `<tr>
+      <td style="color:var(--on-surface-muted);font-family:var(--font-mono);font-size:var(--text-xs);font-weight:600">${String(realIdx + 1).padStart(2, '0')}</td>
+      <td style="font-weight:500">
+        ${escapeHtml(l.topic)}
+        ${l.notes ? `<div style="font-size:var(--text-xs);color:var(--on-surface-muted);font-style:italic;margin-top:3px;">${escapeHtml(l.notes)}</div>` : ''}
+      </td>
+      <td><span class="status-pill ${statusClass}" style="font-size:var(--text-xs)">${escapeHtml(l.section)}</span></td>
+      <td style="font-family:var(--font-mono);font-weight:600;color:var(--accent-amber)">${escapeHtml(l.duration)}</td>
+      <td>
+        <select class="inline-status" data-idx="${realIdx}" onchange="changeLogStatus(this)">
+          <option value="Not Started" ${l.status==='Not Started'?'selected':''}>Not Started</option>
+          <option value="In Progress" ${l.status==='In Progress'?'selected':''}>In Progress</option>
+          <option value="Completed" ${l.status==='Completed'?'selected':''}>Completed</option>
+        </select>
+      </td>
+      <td><button class="btn btn-danger btn-sm" onclick="removeLog(${realIdx})"><svg class="icon-sm"><use href="#icon-x"/></svg></button></td>
+    </tr>`;
+  }).join('');
+}
+
+function addLog() {
+  const topic = document.getElementById('logTopic').value.trim();
+  if (!topic) { showToast('⚠ Enter a topic'); return; }
+  studyLogs.push({
+    topic,
+    section: document.getElementById('logSection').value,
+    duration: document.getElementById('logDuration').value.trim() || '—',
+    status: document.getElementById('logStatus').value,
+    notes: document.getElementById('logNotes').value.trim(),
+    date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  });
+  localStorage.setItem('qf_logs', JSON.stringify(studyLogs));
+  document.getElementById('logTopic').value = '';
+  document.getElementById('logDuration').value = '';
+  document.getElementById('logNotes').value = '';
+  updateActivity(1);
+  renderHeatmap();
+  renderLogs();
+  showToast('✓ Study session logged');
+}
+
+function changeLogStatus(el) {
+  studyLogs[el.dataset.idx].status = el.value;
+  localStorage.setItem('qf_logs', JSON.stringify(studyLogs));
+  renderLogs();
+}
+
+function removeLog(idx) {
+  studyLogs.splice(idx, 1);
+  localStorage.setItem('qf_logs', JSON.stringify(studyLogs));
+  renderLogs();
+}
+
+function filterLogs(filter, el) {
+  currentFilter = filter;
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  renderLogs();
+}
+
+// ══════════════════════════════════════════
+// RENDER: Resources
+// ══════════════════════════════════════════
+function buildResources() {
+  const container = document.getElementById('resourcesContainer');
+  const sections = [
+    {
+      title: "§1 — Foundational Math (First Year Review)",
+      courses: [
+        { emoji: "📐", name: "18.06 — Linear Algebra", desc: "Eigenvalues/Eigenvectors, Positive Definite Matrices, and Quadratic Forms (x^T A x).", link: "https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/" },
+        { emoji: "📈", name: "18.02 — Multivariable Calculus", desc: "Partial derivatives, Chain Rule, and Lagrange Multipliers.", link: "https://ocw.mit.edu/courses/18-02-multivariable-calculus-fall-2007/" },
+        { emoji: "🔄", name: "18.03 — Differential Equations", desc: "Ordinary Differential Equations (ODEs), Heat Equation basics, and Boundary Value Problems.", link: "https://ocw.mit.edu/courses/18-03-differential-equations-spring-2010/" },
+      ]
+    },
+    {
+      title: "§2 — The Probability Bridge (Advanced Concepts)",
+      courses: [
+        { emoji: "🎲", name: "18.600 — Probability and Random Variables", desc: "Central Limit Theorem, Normal vs. Log-normal distributions, and Laws of Large Numbers.", link: "https://ocw.mit.edu/courses/18-600-probability-and-random-variables-fall-2019/" },
+        { emoji: "📊", name: "18.445 — Introduction to Stochastic Processes", desc: "Markov Chains, Martingales, and Brownian Motion (Essential for Ito Calculus).", link: "https://ocw.mit.edu/courses/18-445-introduction-to-stochastic-processes-spring-2015/" },
+        { emoji: "∫", name: "18.100C — Real Analysis", desc: "Riemann Integration and Continuity (Foundational for Graduate Stochastics).", link: "https://ocw.mit.edu/courses/18-100c-real-analysis-fall-2012/" },
+      ]
+    },
+    {
+      title: "§3 — Data & Prediction (The Statistical Side)",
+      courses: [
+        { emoji: "📉", name: "15.075J — Statistical Thinking and Data Analysis", desc: "Moving from theory to real-world data, regression, and hypothesis testing.", link: "https://ocw.mit.edu/courses/15-075j-statistical-thinking-and-data-analysis-fall-2011/" },
+        { emoji: "📏", name: "14.382 — Econometrics", desc: "Time Series Analysis, GARCH models (Volatility modeling), and Autoregressive models.", link: "https://ocw.mit.edu/courses/14-382-econometrics-spring-2017/" },
+        { emoji: "🤖", name: "6.036 — Introduction to Machine Learning", desc: "Linear Classifiers, Neural Networks, and Reinforcement Learning.", link: "https://ocw.mit.edu/courses/6-036-introduction-to-machine-learning-fall-2020/" },
+      ]
+    },
+    {
+      title: "§4 — Numerical Methods & Optimization",
+      courses: [
+        { emoji: "🧮", name: "18.330 — Introduction to Numerical Analysis", desc: "Solving complex math equations using algorithms and computer simulations.", link: "https://ocw.mit.edu/courses/18-330-introduction-to-numerical-analysis-spring-2012/" },
+        { emoji: "⚙️", name: "15.093J — Optimization Methods", desc: "Finding the \"best\" solution under constraints (Essential for Portfolio Management).", link: "https://ocw.mit.edu/courses/15-093j-optimization-methods-fall-2009/" },
+        { emoji: "🎯", name: "15.450 — Analytics of Finance", desc: "Monte Carlo Simulation, Stochastic (Ito) Calculus, and Numerical Dynamic Programming.", link: "https://ocw.mit.edu/courses/15-450-analytics-of-finance-fall-2010/" },
+      ]
+    },
+    {
+      title: "§5 — Target Finance Applications",
+      courses: [
+        { emoji: "💰", name: "15.401 — Finance Theory I", desc: "Capital Asset Pricing Model (CAPM), Arbitrage, and the Efficient Market Hypothesis.", link: "https://ocw.mit.edu/courses/15-401-finance-theory-i-fall-2008/" },
+        { emoji: "📜", name: "18.S096 — Topics in Math with Applications in Finance", desc: "Binomial Trees, Black-Scholes Formula, Portfolio Theory, and Risk Management.", link: "https://ocw.mit.edu/courses/18-s096-topics-in-mathematics-with-applications-in-finance-fall-2013/" },
+        { emoji: "🏦", name: "15.433 — Investments", desc: "Active Portfolio Management, Hedge Fund strategies, and Credit Risk.", link: "https://ocw.mit.edu/courses/15-433-investments-spring-2003/" },
+      ]
+    },
+    {
+      title: "§6 — Advanced & Modern Capstones",
+      courses: [
+        { emoji: "📊", name: "18.642 — Topics in Math w/ Applications in Finance (Updated)", desc: "Bond Math, Term Structure Models (HJM), and Factor Modeling.", link: "https://ocw.mit.edu/courses/18-642-topics-in-mathematics-with-applications-in-finance-fall-2024/" },
+        { emoji: "🚀", name: "15.S08 — FinTech: Shaping the Financial World", desc: "AI in Finance, Market Microstructure (HFT), and Blockchain.", link: "https://ocw.mit.edu/courses/15-s08-fintech-shaping-the-financial-world-spring-2020/" },
+        { emoji: "∞", name: "15.070J — Advanced Stochastic Processes", desc: "Measure-theoretic probability and continuous-time martingales.", link: "https://ocw.mit.edu/courses/15-070j-advanced-stochastic-processes-fall-2013/" },
+      ]
+    },
+  ];
+
+  container.innerHTML = sections.map((sec, idx) => `
+    <div class="resource-section-title">${sec.title}</div>
+    <div class="resource-grid">
+      ${sec.courses.map(c => `
+        <div class="resource-card">
+          <div class="resource-indicator section-${idx + 1}"></div>
+          <div class="resource-name">${c.name}</div>
+          <div class="resource-desc">${c.desc}</div>
+          <a class="resource-link" href="${c.link}" target="_blank" rel="noopener">Open on MIT OCW →</a>
+        </div>
+      `).join('')}
+    </div>
+  `).join('');
+}
+
+// ══════════════════════════════════════════
+// PREREQUISITES GRAPH
+// ══════════════════════════════════════════
+const COURSES = {
+  '18.06':   { name: '18.06',   full: 'Linear Algebra',        section: 1, col: 0, row: 0 },
+  '18.02':   { name: '18.02',   full: 'Multivariable Calculus', section: 1, col: 0, row: 1 },
+  '18.03':   { name: '18.03',   full: 'Differential Equations', section: 1, col: 0, row: 2 },
+  '18.600':  { name: '18.600',  full: 'Probability & Random Vars', section: 2, col: 1, row: 0 },
+  '18.445':  { name: '18.445',  full: 'Stochastic Processes',   section: 2, col: 1, row: 1 },
+  '18.100C': { name: '18.100C', full: 'Real Analysis',          section: 2, col: 1, row: 2 },
+  '15.075J': { name: '15.075J', full: 'Statistics & Data',      section: 3, col: 2, row: 0 },
+  '14.382':  { name: '14.382',  full: 'Econometrics',           section: 3, col: 2, row: 1 },
+  '6.036':   { name: '6.036',   full: 'Machine Learning',       section: 3, col: 2, row: 2 },
+  '18.330':  { name: '18.330',  full: 'Numerical Analysis',     section: 4, col: 3, row: 0 },
+  '15.093J': { name: '15.093J', full: 'Optimization Methods',   section: 4, col: 3, row: 1 },
+  '15.450':  { name: '15.450',  full: 'Analytics of Finance',   section: 4, col: 3, row: 2 },
+  '15.401':  { name: '15.401',  full: 'Finance Theory I',       section: 5, col: 4, row: 0 },
+  '18.S096': { name: '18.S096', full: 'Math in Finance',        section: 5, col: 4, row: 1 },
+  '15.433':  { name: '15.433',  full: 'Investments',            section: 5, col: 4, row: 2 },
+  '18.642':  { name: '18.642',  full: 'Finance Math (Adv)',     section: 6, col: 5, row: 0 },
+  '15.S08':  { name: '15.S08',  full: 'FinTech',                section: 6, col: 5, row: 1 },
+  '15.070J': { name: '15.070J', full: 'Adv Stochastic Proc',    section: 6, col: 5, row: 2 },
+};
+
+const PREREQ_EDGES = [
+  ['18.06', '18.600'], ['18.02', '18.03'], ['18.02', '18.600'],
+  ['18.06', '15.093J'], ['18.03', '18.445'], ['18.600', '18.445'],
+  ['18.600', '14.382'], ['18.600', '6.036'], ['18.600', '15.075J'],
+  ['18.445', '15.450'], ['18.445', '18.S096'], ['18.445', '15.070J'],
+  ['18.100C', '15.070J'], ['15.075J', '14.382'],
+  ['14.382', '15.433'], ['6.036', '15.S08'],
+  ['18.330', '15.450'], ['15.093J', '15.450'], ['15.093J', '15.433'],
+  ['15.401', '18.S096'], ['15.401', '15.433'],
+  ['15.450', '18.642'], ['18.S096', '18.642'],
+  ['15.433', '15.S08'],
+];
+
+const SECTION_COLORS = {
+  1: '#3b82f6', 2: '#10b981', 3: '#f59e0b',
+  4: '#a78bfa', 5: '#f472b6', 6: '#22d3ee',
+};
+
+function getCourseChecklistKey(courseId) {
+  const mapping = {};
+  ROADMAP.forEach((sec, si) => {
+    sec.groups.forEach(group => {
+      group.items.forEach((item, ii) => {
+        const courseNum = item.text.split(' — ')[0].trim();
+        mapping[courseNum] = `s${si}_${group.label}_${ii}`;
+      });
+    });
+  });
+  return mapping[courseId];
+}
+
+function isCourseCompleted(courseId) {
+  const key = getCourseChecklistKey(courseId);
+  return key ? (checklistState[key] || false) : false;
+}
+
+function arePrerequsitesComplete(courseId) {
+  const prereqs = PREREQ_EDGES.filter(e => e[1] === courseId).map(e => e[0]);
+  if (prereqs.length === 0) return true;
+  return prereqs.every(p => isCourseCompleted(p));
+}
+
+// Track previous node states for animations
+let prevNodeStates = {};
+
+function buildPrereqGraph() {
+  const container = document.getElementById('prereqGraph');
+  const nodeW = 130, nodeH = 50, colGap = 155, rowGap = 70;
+  const padX = 30, padY = 40;
+  const svgW = padX * 2 + 6 * colGap + nodeW;
+  const svgH = padY * 2 + 3 * rowGap + nodeH;
+
+  function pos(c) {
+    return { x: padX + c.col * colGap, y: padY + c.row * rowGap };
+  }
+
+  // Capture current states for comparison
+  const newNodeStates = {};
+  Object.keys(COURSES).forEach(id => {
+    const done = isCourseCompleted(id);
+    const ready = !done && arePrerequsitesComplete(id);
+    newNodeStates[id] = { done, ready };
+  });
+
+  // Check if this is a state update (not initial load)
+  const isUpdate = Object.keys(prevNodeStates).length > 0;
+
+  // Determine which nodes changed state (only on updates, not initial load)
+  const justCompleted = [];
+  const justUnlocked = [];
+  if (isUpdate) {
+    Object.keys(newNodeStates).forEach(id => {
+      const prev = prevNodeStates[id] || { done: false, ready: false };
+      const curr = newNodeStates[id];
+      if (!prev.done && curr.done) justCompleted.push(id);
+      if (!prev.ready && curr.ready) justUnlocked.push(id);
+    });
+  }
+
+  let edgeSvg = '';
+  PREREQ_EDGES.forEach(([from, to], i) => {
+    const f = pos(COURSES[from]);
+    const t = pos(COURSES[to]);
+    const x1 = f.x + nodeW, y1 = f.y + nodeH / 2;
+    const x2 = t.x, y2 = t.y + nodeH / 2;
+    const cx = (x1 + x2) / 2;
+    // Add state class for edge color transitions
+    const fromDone = newNodeStates[from].done;
+    const toDone = newNodeStates[to].done;
+    const toReady = newNodeStates[to].ready;
+    let edgeClass = 'prereq-edge';
+    let edgeStroke = '#1a2236';
+    if (fromDone && toDone) { edgeClass += ' state-done'; edgeStroke = 'rgba(16, 185, 129, 0.4)'; }
+    else if (fromDone && toReady) { edgeClass += ' state-ready'; edgeStroke = 'rgba(59, 130, 246, 0.3)'; }
+    edgeSvg += `<path class="${edgeClass}" data-from="${from}" data-to="${to}" d="M${x1},${y1} C${cx},${y1} ${cx},${y2} ${x2},${y2}" fill="none" stroke="${edgeStroke}" stroke-width="1.5" />`;
+  });
+
+  let nodesSvg = '';
+  Object.entries(COURSES).forEach(([id, c]) => {
+    const p = pos(c);
+    const done = newNodeStates[id].done;
+    const ready = newNodeStates[id].ready;
+    let fill = '#1a2236';
+    let stroke = '#2a3a5c';
+    let textFill = '#8899b4';
+    let subFill = '#4a5c7a';
+    let glow = '';
+    let stateClass = '';
+    if (done) { fill = 'rgba(16,185,129,0.12)'; stroke = '#10b981'; textFill = '#dfe2ef'; subFill = '#10b981'; glow = ` filter="drop-shadow(0 0 6px rgba(16,185,129,0.3))"`; }
+    else if (ready) { fill = 'rgba(59,130,246,0.08)'; stroke = 'rgba(59,130,246,0.5)'; textFill = '#dfe2ef'; subFill = '#3b82f6'; stateClass = ' state-ready'; }
+    // Add animation classes for state changes
+    if (justCompleted.includes(id)) stateClass += ' just-completed';
+    if (justUnlocked.includes(id)) stateClass += ' just-unlocked';
+    nodesSvg += `<g class="prereq-node${stateClass}" data-id="${id}" data-col="${c.col}" onmouseenter="prereqHover('${id}')" onmouseleave="prereqReset()"${glow}>
+      <rect x="${p.x}" y="${p.y}" width="${nodeW}" height="${nodeH}" rx="6" fill="${fill}" stroke="${stroke}" stroke-width="1.5"/>
+      <text x="${p.x + nodeW/2}" y="${p.y + 20}" text-anchor="middle" font-size="11" font-weight="700" fill="${textFill}">${c.name}</text>
+      <text x="${p.x + nodeW/2}" y="${p.y + 35}" text-anchor="middle" font-size="8.5" fill="${subFill}">${c.full}</text>
+    </g>`;
+  });
+
+  // Update previous states for next comparison
+  prevNodeStates = newNodeStates;
+
+  let labelsSvg = '';
+  const secLabels = ['§1 Foundation', '§2 Probability', '§3 Data', '§4 Numerical', '§5 Finance', '§6 Advanced'];
+  secLabels.forEach((label, i) => {
+    const x = padX + i * colGap + nodeW / 2;
+    labelsSvg += `<text class="prereq-label" data-col="${i}" x="${x}" y="18" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="600" fill="${SECTION_COLORS[i+1]}" letter-spacing="0.5">${label}</text>`;
+  });
+
+  // Add no-entry-anim class on state updates to skip cascade animation
+  const svgClass = isUpdate ? 'prereq-svg no-entry-anim' : 'prereq-svg';
+  container.innerHTML = `<svg class="${svgClass}" viewBox="0 0 ${svgW} ${svgH}" xmlns="http://www.w3.org/2000/svg">
+    ${labelsSvg}${edgeSvg}${nodesSvg}
+  </svg>`;
+
+  // Remove animation classes after they complete
+  if (isUpdate) {
+    setTimeout(() => {
+      document.querySelectorAll('.prereq-node.just-completed, .prereq-node.just-unlocked').forEach(n => {
+        n.classList.remove('just-completed', 'just-unlocked');
+      });
+    }, 700);
+  }
+}
+
+function prereqHover(id) {
+  const incoming = PREREQ_EDGES.filter(e => e[1] === id).map(e => e[0]);
+  const outgoing = PREREQ_EDGES.filter(e => e[0] === id).map(e => e[1]);
+  const related = new Set([id, ...incoming, ...outgoing]);
+  const neighbors = new Set([...incoming, ...outgoing]); // excludes hovered node
+
+  document.querySelectorAll('.prereq-node').forEach(n => {
+    const nodeId = n.dataset.id;
+    n.classList.toggle('dimmed', !related.has(nodeId));
+    n.classList.toggle('related', neighbors.has(nodeId)); // glow effect on neighbors
+  });
+  document.querySelectorAll('.prereq-edge').forEach(e => {
+    const isRelated = (e.dataset.from === id || e.dataset.to === id);
+    e.classList.toggle('dimmed', !isRelated);
+    e.classList.toggle('highlighted', isRelated);
+    if (isRelated) {
+      const isIncoming = e.dataset.to === id;
+      e.setAttribute('stroke', isIncoming ? '#10b981' : '#3b82f6');
+    }
+  });
+}
+
+function prereqReset() {
+  document.querySelectorAll('.prereq-node').forEach(n => n.classList.remove('dimmed', 'related'));
+  document.querySelectorAll('.prereq-edge').forEach(e => {
+    e.classList.remove('dimmed', 'highlighted');
+    // Reset to state-based color
+    if (e.classList.contains('state-done')) {
+      e.setAttribute('stroke', 'rgba(16, 185, 129, 0.4)');
+    } else if (e.classList.contains('state-ready')) {
+      e.setAttribute('stroke', 'rgba(59, 130, 246, 0.3)');
+    } else {
+      e.setAttribute('stroke', '#1a2236');
+    }
+  });
+}
+
+// ══════════════════════════════════════════
+// LECTURE TRACKER
+// ══════════════════════════════════════════
+const LECTURE_DATA = [
+  { id: '18.06',   name: '18.06 — Linear Algebra',              section: 1, total: 34 },
+  { id: '18.02',   name: '18.02 — Multivariable Calculus',      section: 1, total: 35 },
+  { id: '18.03',   name: '18.03 — Differential Equations',      section: 1, total: 33 },
+  { id: '18.600',  name: '18.600 — Probability & Random Vars',  section: 2, total: 25 },
+  { id: '18.445',  name: '18.445 — Stochastic Processes',       section: 2, total: 24 },
+  { id: '18.100C', name: '18.100C — Real Analysis',             section: 2, total: 26 },
+  { id: '15.075J', name: '15.075J — Statistics & Data Analysis', section: 3, total: 23 },
+  { id: '14.382',  name: '14.382 — Econometrics',               section: 3, total: 14 },
+  { id: '6.036',   name: '6.036 — Machine Learning',            section: 3, total: 25 },
+  { id: '18.330',  name: '18.330 — Numerical Analysis',         section: 4, total: 24 },
+  { id: '15.093J', name: '15.093J — Optimization Methods',      section: 4, total: 25 },
+  { id: '15.450',  name: '15.450 — Analytics of Finance',       section: 4, total: 18 },
+  { id: '15.401',  name: '15.401 — Finance Theory I',           section: 5, total: 20 },
+  { id: '18.S096', name: '18.S096 — Math in Finance',           section: 5, total: 26 },
+  { id: '15.433',  name: '15.433 — Investments',                section: 5, total: 20 },
+  { id: '18.642',  name: '18.642 — Finance Math (Advanced)',    section: 6, total: 26 },
+  { id: '15.S08',  name: '15.S08 — FinTech',                    section: 6, total: 12 },
+  { id: '15.070J', name: '15.070J — Adv Stochastic Processes',  section: 6, total: 23 },
+];
+
+const SECTION_NAMES = {
+  1: '§1 — Foundational Math',
+  2: '§2 — The Probability Bridge',
+  3: '§3 — Data & Prediction',
+  4: '§4 — Numerical Methods & Optimization',
+  5: '§5 — Target Finance Applications',
+  6: '§6 — Advanced & Modern Capstones',
+};
+
+const SECTION_BADGE_STYLES = {
+  1: 'background:rgba(59,130,246,0.12);color:#3b82f6',
+  2: 'background:rgba(16,185,129,0.12);color:#10b981',
+  3: 'background:rgba(245,158,11,0.12);color:#f59e0b',
+  4: 'background:rgba(167,139,250,0.12);color:#a78bfa',
+  5: 'background:rgba(244,114,182,0.12);color:#f472b6',
+  6: 'background:rgba(34,211,238,0.12);color:#22d3ee',
+};
+
+let lectureProgress = JSON.parse(localStorage.getItem('qf_lectures') || '{}');
+
+function buildLectureTracker() {
+  const container = document.getElementById('lectureCards');
+  const sections = {};
+  LECTURE_DATA.forEach(c => {
+    if (!sections[c.section]) sections[c.section] = [];
+    sections[c.section].push(c);
+  });
+
+  let totalLectures = 0, totalCompleted = 0, coursesStarted = 0;
+
+  let html = '';
+  Object.keys(sections).sort().forEach(sec => {
+    html += `<div class="lecture-section-group">
+      <div class="lecture-section-group-title">${SECTION_NAMES[sec]}</div>`;
+
+    sections[sec].forEach(course => {
+      const current = lectureProgress[course.id] || 0;
+      const pct = Math.round((current / course.total) * 100);
+      const isComplete = current >= course.total;
+      totalLectures += course.total;
+      totalCompleted += current;
+      if (current > 0) coursesStarted++;
+
+      html += `<div class="lecture-card">
+        <div class="lecture-card-header">
+          <div class="lecture-section-badge" style="${SECTION_BADGE_STYLES[sec]}">§${sec}</div>
+          <div class="lecture-course-name">${escapeHtml(course.name)}</div>
+          <div class="lecture-count">${current}/${course.total}</div>
+        </div>
+        <div class="lecture-progress-wrap">
+          <div class="lecture-progress-bar">
+            <div class="lecture-progress-fill ${isComplete ? 'complete' : ''}" style="width:${pct}%"></div>
+          </div>
+          <span style="font-family:var(--font-mono);font-size:var(--text-xs);font-weight:600;color:${isComplete ? 'var(--accent-green)' : 'var(--on-surface-muted)'};min-width:38px;text-align:right;">${pct}%</span>
+        </div>
+        <div class="lecture-slider-row">
+          <input type="range" class="lecture-slider" min="0" max="${course.total}" value="${current}" data-id="${course.id}" style="--fill-percent:${pct}%" oninput="updateLecture(this)">
+          <input type="number" class="lecture-input" min="0" max="${course.total}" value="${current}" data-id="${course.id}" onchange="updateLectureInput(this)">
+          <span class="lecture-total">/ ${course.total}</span>
+        </div>
+      </div>`;
+    });
+
+    html += `</div>`;
+  });
+
+  container.innerHTML = html;
+
+  const overallPct = totalLectures > 0 ? Math.round((totalCompleted / totalLectures) * 100) : 0;
+  document.getElementById('lectureBadge').textContent = overallPct + '%';
+  document.getElementById('lectureOverallTag').textContent = `${coursesStarted} / 18 courses started`;
+}
+
+function updateLecture(slider) {
+  const id = slider.dataset.id;
+  const val = parseInt(slider.value);
+  lectureProgress[id] = val;
+  localStorage.setItem('qf_lectures', JSON.stringify(lectureProgress));
+
+  // Update only the affected card elements, not the entire tracker
+  const course = LECTURE_DATA.find(c => c.id === id);
+  const card = slider.closest('.lecture-card');
+  if (card && course) {
+    const pct = Math.round((val / course.total) * 100);
+    const isComplete = val >= course.total;
+    slider.style.setProperty('--fill-percent', pct + '%');
+    card.querySelector('.lecture-count').textContent = `${val}/${course.total}`;
+    card.querySelector('.lecture-progress-fill').style.width = pct + '%';
+    card.querySelector('.lecture-progress-fill').classList.toggle('complete', isComplete);
+    const pctSpan = card.querySelector('.lecture-progress-wrap > span');
+    pctSpan.textContent = pct + '%';
+    pctSpan.style.color = isComplete ? 'var(--accent-green)' : 'var(--on-surface-muted)';
+    card.querySelector('.lecture-input').value = val;
+  }
+  updateLectureBadges();
+}
+
+function updateLectureInput(input) {
+  const id = input.dataset.id;
+  const course = LECTURE_DATA.find(c => c.id === id);
+  let val = parseInt(input.value) || 0;
+  val = Math.max(0, Math.min(val, course.total));
+  input.value = val;
+  lectureProgress[id] = val;
+  localStorage.setItem('qf_lectures', JSON.stringify(lectureProgress));
+
+  // Update only the affected card elements
+  const card = input.closest('.lecture-card');
+  if (card && course) {
+    const pct = Math.round((val / course.total) * 100);
+    const isComplete = val >= course.total;
+    const slider = card.querySelector('.lecture-slider');
+    slider.value = val;
+    slider.style.setProperty('--fill-percent', pct + '%');
+    card.querySelector('.lecture-count').textContent = `${val}/${course.total}`;
+    card.querySelector('.lecture-progress-fill').style.width = pct + '%';
+    card.querySelector('.lecture-progress-fill').classList.toggle('complete', isComplete);
+    const pctSpan = card.querySelector('.lecture-progress-wrap > span');
+    pctSpan.textContent = pct + '%';
+    pctSpan.style.color = isComplete ? 'var(--accent-green)' : 'var(--on-surface-muted)';
+  }
+  updateLectureBadges();
+}
+
+function updateLectureBadges() {
+  let totalLectures = 0, totalCompleted = 0, coursesStarted = 0;
+  LECTURE_DATA.forEach(course => {
+    const current = lectureProgress[course.id] || 0;
+    totalLectures += course.total;
+    totalCompleted += current;
+    if (current > 0) coursesStarted++;
+  });
+  const overallPct = totalLectures > 0 ? Math.round((totalCompleted / totalLectures) * 100) : 0;
+  document.getElementById('lectureBadge').textContent = overallPct + '%';
+  document.getElementById('lectureOverallTag').textContent = `${coursesStarted} / 18 courses started`;
+}
+
+// ══════════════════════════════════════════
+// ASSIGNMENT TRACKER
+// ══════════════════════════════════════════
+const ASSIGNMENT_DATA = [
+  { id: '18.06',   name: '18.06 — Linear Algebra',              section: 1, total: 10 },
+  { id: '18.02',   name: '18.02 — Multivariable Calculus',      section: 1, total: 12 },
+  { id: '18.03',   name: '18.03 — Differential Equations',      section: 1, total: 9 },
+  { id: '18.600',  name: '18.600 — Probability & Random Vars',  section: 2, total: 10 },
+  { id: '18.445',  name: '18.445 — Stochastic Processes',       section: 2, total: 8 },
+  { id: '18.100C', name: '18.100C — Real Analysis',             section: 2, total: 10 },
+  { id: '15.075J', name: '15.075J — Statistics & Data Analysis', section: 3, total: 8 },
+  { id: '14.382',  name: '14.382 — Econometrics',               section: 3, total: 7 },
+  { id: '6.036',   name: '6.036 — Machine Learning',            section: 3, total: 9 },
+  { id: '18.330',  name: '18.330 — Numerical Analysis',         section: 4, total: 8 },
+  { id: '15.093J', name: '15.093J — Optimization Methods',      section: 4, total: 10 },
+  { id: '15.450',  name: '15.450 — Analytics of Finance',       section: 4, total: 8 },
+  { id: '15.401',  name: '15.401 — Finance Theory I',           section: 5, total: 8 },
+  { id: '18.S096', name: '18.S096 — Math in Finance',           section: 5, total: 6 },
+  { id: '15.433',  name: '15.433 — Investments',                section: 5, total: 6 },
+  { id: '18.642',  name: '18.642 — Finance Math (Advanced)',    section: 6, total: 6 },
+  { id: '15.S08',  name: '15.S08 — FinTech',                    section: 6, total: 4 },
+  { id: '15.070J', name: '15.070J — Adv Stochastic Processes',  section: 6, total: 8 },
+];
+
+let assignmentProgress = JSON.parse(localStorage.getItem('qf_assignments') || '{}');
+
+function buildAssignmentTracker() {
+  const container = document.getElementById('assignmentCards');
+  const sections = {};
+  ASSIGNMENT_DATA.forEach(c => {
+    if (!sections[c.section]) sections[c.section] = [];
+    sections[c.section].push(c);
+  });
+
+  let totalAssignments = 0, totalCompleted = 0, coursesStarted = 0;
+
+  let html = '';
+  Object.keys(sections).sort().forEach(sec => {
+    html += `<div class="lecture-section-group">
+      <div class="lecture-section-group-title">${SECTION_NAMES[sec]}</div>`;
+
+    sections[sec].forEach(course => {
+      const current = assignmentProgress[course.id] || 0;
+      const pct = Math.round((current / course.total) * 100);
+      const isComplete = current >= course.total;
+      totalAssignments += course.total;
+      totalCompleted += current;
+      if (current > 0) coursesStarted++;
+
+      html += `<div class="lecture-card">
+        <div class="lecture-card-header">
+          <div class="lecture-section-badge" style="${SECTION_BADGE_STYLES[sec]}">§${sec}</div>
+          <div class="lecture-course-name">${escapeHtml(course.name)}</div>
+          <div class="lecture-count">${current}/${course.total}</div>
+        </div>
+        <div class="lecture-progress-wrap">
+          <div class="lecture-progress-bar">
+            <div class="lecture-progress-fill ${isComplete ? 'complete' : ''}" style="width:${pct}%"></div>
+          </div>
+          <span style="font-family:var(--font-mono);font-size:var(--text-xs);font-weight:600;color:${isComplete ? 'var(--accent-green)' : 'var(--on-surface-muted)'};min-width:38px;text-align:right;">${pct}%</span>
+        </div>
+        <div class="lecture-slider-row">
+          <input type="range" class="lecture-slider" min="0" max="${course.total}" value="${current}" data-id="${course.id}" style="--fill-percent:${pct}%" oninput="updateAssignment(this)">
+          <input type="number" class="lecture-input" min="0" max="${course.total}" value="${current}" data-id="${course.id}" onchange="updateAssignmentInput(this)">
+          <span class="lecture-total">/ ${course.total} psets</span>
+        </div>
+      </div>`;
+    });
+
+    html += `</div>`;
+  });
+
+  container.innerHTML = html;
+
+  const overallPct = totalAssignments > 0 ? Math.round((totalCompleted / totalAssignments) * 100) : 0;
+  document.getElementById('assignmentBadge').textContent = overallPct + '%';
+  document.getElementById('assignmentOverallTag').textContent = `${coursesStarted} / 18 courses started`;
+}
+
+function updateAssignment(slider) {
+  const id = slider.dataset.id;
+  const val = parseInt(slider.value);
+  assignmentProgress[id] = val;
+  localStorage.setItem('qf_assignments', JSON.stringify(assignmentProgress));
+
+  // Update only the affected card elements, not the entire tracker
+  const course = ASSIGNMENT_DATA.find(c => c.id === id);
+  const card = slider.closest('.lecture-card');
+  if (card && course) {
+    const pct = Math.round((val / course.total) * 100);
+    const isComplete = val >= course.total;
+    slider.style.setProperty('--fill-percent', pct + '%');
+    card.querySelector('.lecture-count').textContent = `${val}/${course.total}`;
+    card.querySelector('.lecture-progress-fill').style.width = pct + '%';
+    card.querySelector('.lecture-progress-fill').classList.toggle('complete', isComplete);
+    const pctSpan = card.querySelector('.lecture-progress-wrap > span');
+    pctSpan.textContent = pct + '%';
+    pctSpan.style.color = isComplete ? 'var(--accent-green)' : 'var(--on-surface-muted)';
+    card.querySelector('.lecture-input').value = val;
+  }
+  updateAssignmentBadges();
+}
+
+function updateAssignmentInput(input) {
+  const id = input.dataset.id;
+  const course = ASSIGNMENT_DATA.find(c => c.id === id);
+  let val = parseInt(input.value) || 0;
+  val = Math.max(0, Math.min(val, course.total));
+  input.value = val;
+  assignmentProgress[id] = val;
+  localStorage.setItem('qf_assignments', JSON.stringify(assignmentProgress));
+
+  // Update only the affected card elements
+  const card = input.closest('.lecture-card');
+  if (card && course) {
+    const pct = Math.round((val / course.total) * 100);
+    const isComplete = val >= course.total;
+    const slider = card.querySelector('.lecture-slider');
+    slider.value = val;
+    slider.style.setProperty('--fill-percent', pct + '%');
+    card.querySelector('.lecture-count').textContent = `${val}/${course.total}`;
+    card.querySelector('.lecture-progress-fill').style.width = pct + '%';
+    card.querySelector('.lecture-progress-fill').classList.toggle('complete', isComplete);
+    const pctSpan = card.querySelector('.lecture-progress-wrap > span');
+    pctSpan.textContent = pct + '%';
+    pctSpan.style.color = isComplete ? 'var(--accent-green)' : 'var(--on-surface-muted)';
+  }
+  updateAssignmentBadges();
+}
+
+function updateAssignmentBadges() {
+  let totalAssignments = 0, totalCompleted = 0, coursesStarted = 0;
+  ASSIGNMENT_DATA.forEach(course => {
+    const current = assignmentProgress[course.id] || 0;
+    totalAssignments += course.total;
+    totalCompleted += current;
+    if (current > 0) coursesStarted++;
+  });
+  const overallPct = totalAssignments > 0 ? Math.round((totalCompleted / totalAssignments) * 100) : 0;
+  document.getElementById('assignmentBadge').textContent = overallPct + '%';
+  document.getElementById('assignmentOverallTag').textContent = `${coursesStarted} / 18 courses started`;
+}
+
+// ══════════════════════════════════════════
+// PAPERS READING LIST
+// ══════════════════════════════════════════
+const PAPERS = [
+  {
+    category: "Option Pricing & Derivatives",
+    items: [
+      { id: "p_bs73", title: "The Pricing of Options and Corporate Liabilities", authors: "Black, F. & Scholes, M. (1973)", detail: "The foundational paper. Derives the Black-Scholes PDE and closed-form option pricing formula using no-arbitrage arguments." },
+      { id: "p_merton73", title: "Theory of Rational Option Pricing", authors: "Merton, R.C. (1973)", detail: "Extends Black-Scholes to dividends, American options, and down-and-out barriers. Introduces the continuous-time finance framework." },
+      { id: "p_crr79", title: "Option Pricing: A Simplified Approach", authors: "Cox, J.C., Ross, S.A. & Rubinstein, M. (1979)", detail: "The binomial tree model. Essential for building intuition before continuous-time models — every quant interview asks this." },
+      { id: "p_heston93", title: "A Closed-Form Solution for Options with Stochastic Volatility", authors: "Heston, S.L. (1993)", detail: "The Heston model — stochastic volatility with mean reversion and correlation. Still widely used in practice." },
+      { id: "p_dupire94", title: "Pricing with a Smile", authors: "Dupire, B. (1994)", detail: "Local volatility model. Shows how to extract a unique diffusion process consistent with all observed option prices." },
+    ]
+  },
+  {
+    category: "Portfolio Theory & Asset Pricing",
+    items: [
+      { id: "p_markowitz52", title: "Portfolio Selection", authors: "Markowitz, H. (1952)", detail: "Mean-variance optimization. The birth of modern portfolio theory — still the backbone of quantitative asset allocation." },
+      { id: "p_sharpe64", title: "Capital Asset Prices: A Theory of Market Equilibrium", authors: "Sharpe, W.F. (1964)", detail: "The CAPM. Derives the security market line and the concept of systematic vs. idiosyncratic risk." },
+      { id: "p_fama93", title: "Common Risk Factors in the Returns on Stocks and Bonds", authors: "Fama, E.F. & French, K.R. (1993)", detail: "The Fama-French three-factor model (market, size, value). Replaced CAPM as the standard academic pricing model." },
+      { id: "p_ff15", title: "A Five-Factor Asset Pricing Model", authors: "Fama, E.F. & French, K.R. (2015)", detail: "Extends to five factors adding profitability and investment. The current benchmark for cross-sectional asset pricing." },
+    ]
+  },
+  {
+    category: "Stochastic Calculus & Mathematical Finance",
+    items: [
+      { id: "p_ito44", title: "Stochastic Integral", authors: "Itô, K. (1944)", detail: "Defines the stochastic integral and Itô's formula. The mathematical foundation for all continuous-time finance." },
+      { id: "p_gh79", title: "Martingales and Stochastic Integrals in the Theory of Continuous Trading", authors: "Harrison, J.M. & Pliska, S.R. (1981)", detail: "Establishes the fundamental theorem of asset pricing — links no-arbitrage to existence of equivalent martingale measures." },
+      { id: "p_hjm92", title: "Bond Pricing and the Term Structure of Interest Rates", authors: "Heath, D., Jarrow, R.A. & Morton, A. (1992)", detail: "The HJM framework for modeling the entire forward rate curve. Foundation for fixed-income derivatives pricing." },
+    ]
+  },
+  {
+    category: "Volatility & Risk",
+    items: [
+      { id: "p_engle82", title: "Autoregressive Conditional Heteroscedasticity", authors: "Engle, R.F. (1982)", detail: "The ARCH model. First rigorous treatment of time-varying volatility in financial returns — led to Nobel Prize." },
+      { id: "p_bollerslev86", title: "Generalized Autoregressive Conditional Heteroskedasticity", authors: "Bollerslev, T. (1986)", detail: "GARCH(1,1). The workhorse volatility model in practice — used everywhere from risk management to option pricing." },
+      { id: "p_jpmorgan94", title: "RiskMetrics — Technical Document", authors: "J.P. Morgan (1994)", detail: "Introduced Value-at-Risk (VaR) to the industry. Standardized risk measurement across trading desks globally." },
+    ]
+  },
+  {
+    category: "Market Microstructure & HFT",
+    items: [
+      { id: "p_kyle85", title: "Continuous Auctions and Insider Trading", authors: "Kyle, A.S. (1985)", detail: "The Kyle model. Defines market depth, informed vs. noise traders, and price impact — foundational for HFT theory." },
+      { id: "p_glosten85", title: "Bid, Ask and Transaction Prices in a Specialist Market", authors: "Glosten, L.R. & Milgrom, P.R. (1985)", detail: "Information-based model of the bid-ask spread. Explains why market makers widen spreads under adverse selection." },
+      { id: "p_almgren00", title: "Optimal Execution of Portfolio Transactions", authors: "Almgren, R. & Chriss, N. (2000)", detail: "The Almgren-Chriss framework for optimal execution. Balances market impact vs. timing risk — used at every quant desk." },
+    ]
+  },
+  {
+    category: "Machine Learning in Finance",
+    items: [
+      { id: "p_gu20", title: "Empirical Asset Pricing via Machine Learning", authors: "Gu, S., Kelly, B. & Xiu, D. (2020)", detail: "Comprehensive comparison of ML methods for return prediction. Random forests and neural nets outperform linear models." },
+      { id: "p_dixon20", title: "Machine Learning in Finance: From Theory to Practice", authors: "Dixon, M.F., Halperin, I. & Bilokon, P. (2020)", detail: "Textbook-length treatment of ML for derivatives pricing, portfolio construction, and risk management with Python code." },
+      { id: "p_lbf18", title: "Deep Hedging", authors: "Buehler, H., Gonon, L., Teichmann, J. & Wood, B. (2019)", detail: "Uses deep learning to find optimal hedging strategies under transaction costs. A paradigm shift from classical Greeks." },
+    ]
+  },
+];
+
+let papersState = JSON.parse(localStorage.getItem('qf_papers') || '{}');
+
+function buildPapers() {
+  const container = document.getElementById('papersCards');
+  let totalPapers = 0, totalRead = 0;
+
+  let html = '';
+  PAPERS.forEach(cat => {
+    let catRead = 0;
+    cat.items.forEach(p => {
+      totalPapers++;
+      if (papersState[p.id]) { totalRead++; catRead++; }
+    });
+
+    html += `<div class="papers-section-group">
+      <div class="papers-section-group-title">
+        ${cat.category}
+        <span class="papers-section-count">${catRead}/${cat.items.length}</span>
+      </div>`;
+
+    cat.items.forEach(paper => {
+      const checked = papersState[paper.id] || false;
+      html += `<div class="paper-card">
+        <label class="check-item" style="padding:0;align-items:flex-start;">
+          <input type="checkbox" data-key="${paper.id}" ${checked ? 'checked' : ''} onchange="togglePaper(this)">
+          <span class="check-box" style="margin-top:3px"></span>
+          <div style="flex:1">
+            <span class="paper-title check-label">${escapeHtml(paper.title)}</span>
+            <span class="paper-authors">${escapeHtml(paper.authors)}</span>
+            <span class="paper-detail">${escapeHtml(paper.detail)}</span>
+          </div>
+        </label>
+      </div>`;
+    });
+
+    html += `</div>`;
+  });
+
+  container.innerHTML = html;
+  document.getElementById('papersBadge').textContent = `${totalRead}/${totalPapers}`;
+  document.getElementById('papersTag').textContent = `${totalRead}/${totalPapers} read`;
+}
+
+function togglePaper(el) {
+  papersState[el.dataset.key] = el.checked;
+  localStorage.setItem('qf_papers', JSON.stringify(papersState));
+  updateActivity(el.checked ? 1 : -1);
+  renderHeatmap();
+  buildPapers();
+}
+
+// ══════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════
+function switchView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('view-' + name).classList.add('active');
+  document.querySelector(`.nav-item[data-view="${name}"]`).classList.add('active');
+
+  // Sync topbar nav
+  document.querySelectorAll('.topbar-nav-item').forEach(t => t.classList.remove('active'));
+  const topItem = document.querySelector(`.topbar-nav-item[data-topnav="${name}"]`);
+  if (topItem) topItem.classList.add('active');
+
+  // Reset filter when switching to tracker view
+  if (name === 'tracker') {
+    currentFilter = 'all';
+    document.querySelectorAll('#view-tracker .filter-chip').forEach(c => c.classList.remove('active'));
+    const first = document.querySelector('#view-tracker .filter-chip');
+    if (first) first.classList.add('active');
+  }
+}
+
+function setTopNav(el) {
+  document.querySelectorAll('.topbar-nav-item').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// ══════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════
+function escapeHtml(str) {
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  // Replace emoji prefixes with SVG icons
+  let icon = '';
+  let text = msg;
+  if (msg.startsWith('✓')) {
+    icon = '<svg class="icon-sm" style="stroke:var(--success)"><use href="#icon-check"/></svg>';
+    text = msg.slice(1).trim();
+  } else if (msg.startsWith('⚠')) {
+    icon = '<svg class="icon-sm" style="stroke:var(--warning)"><use href="#icon-alert"/></svg>';
+    text = msg.slice(1).trim();
+  }
+  t.innerHTML = icon ? icon + ' ' + text : text;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+// ── Keyboard shortcuts ──
+document.getElementById('logTopic').addEventListener('keydown', e => {
+  if (e.key === 'Enter') addLog();
+});
+document.getElementById('logNotes').addEventListener('keydown', e => {
+  if (e.key === 'Enter') addLog();
+});
+
+// ══════════════════════════════════════════
+// ── Export / Import ──
+function exportData() {
+  const defaultName = 'quant-finance-progress-' + new Date().toISOString().split('T')[0] + '.json';
+  document.getElementById('exportFilename').value = defaultName;
+  document.getElementById('exportOverlay').classList.add('open');
+  setTimeout(() => document.getElementById('exportFilename').focus(), 220);
+}
+
+function closeExportModal() {
+  document.getElementById('exportOverlay').classList.remove('open');
+}
+
+function handleOverlayClick(e) {
+  if (e.target === document.getElementById('exportOverlay')) closeExportModal();
+}
+
+async function confirmExport() {
+  let filename = document.getElementById('exportFilename').value.trim();
+  if (!filename) filename = 'quant-finance-progress-' + new Date().toISOString().split('T')[0] + '.json';
+  if (!filename.endsWith('.json')) filename += '.json';
+
+  const data = {
+    qf_checklist: checklistState,
+    qf_logs: studyLogs,
+    qf_lectures: lectureProgress,
+    qf_assignments: assignmentProgress,
+    qf_papers: papersState,
+    qf_streak: streak,
+    qf_last_visit: lastVisit,
+    exported_at: new Date().toISOString()
+  };
+  const json = JSON.stringify(data, null, 2);
+
+  closeExportModal();
+
+  if (window.showSaveFilePicker) {
+    try {
+      const handle = await window.showSaveFilePicker({
+        suggestedName: filename,
+        types: [{ description: 'JSON File', accept: { 'application/json': ['.json'] } }]
+      });
+      const writable = await handle.createWritable();
+      await writable.write(json);
+      await writable.close();
+    } catch (err) {
+      if (err.name === 'AbortError') return;
+      throw err;
+    }
+  } else {
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename; a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  showToast('✓ Progress exported successfully');
+}
+
+function importData(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (data.qf_checklist) { checklistState = data.qf_checklist; localStorage.setItem('qf_checklist', JSON.stringify(checklistState)); }
+      if (data.qf_logs) { studyLogs = data.qf_logs; localStorage.setItem('qf_logs', JSON.stringify(studyLogs)); }
+      if (data.qf_lectures) { lectureProgress = data.qf_lectures; localStorage.setItem('qf_lectures', JSON.stringify(lectureProgress)); }
+      if (data.qf_assignments) { assignmentProgress = data.qf_assignments; localStorage.setItem('qf_assignments', JSON.stringify(assignmentProgress)); }
+      if (data.qf_papers) { papersState = data.qf_papers; localStorage.setItem('qf_papers', JSON.stringify(papersState)); }
+      if (data.qf_streak !== undefined) { streak = data.qf_streak; localStorage.setItem('qf_streak', streak); }
+      if (data.qf_last_visit) { lastVisit = data.qf_last_visit; localStorage.setItem('qf_last_visit', lastVisit); }
+      buildRoadmap(); renderLogs(); buildResources(); buildPrereqGraph();
+      buildLectureTracker(); buildAssignmentTracker(); buildPapers();
+      showToast('✓ All progress imported successfully');
+    } catch(err) {
+      showToast('⚠ Invalid file — could not import');
+    }
+    input.value = '';
+  };
+  reader.readAsText(file);
+}
+
+// ── Activity Heatmap ──
+function getActivity() { return JSON.parse(localStorage.getItem('qf_activity') || '{}'); }
+function saveActivity(a) { localStorage.setItem('qf_activity', JSON.stringify(a)); }
+
+function updateActivity(delta) {
+  const _d = new Date();
+  const today = _d.getFullYear() + '-' + String(_d.getMonth()+1).padStart(2,'0') + '-' + String(_d.getDate()).padStart(2,'0');
+  const activity = getActivity();
+  activity[today] = Math.max(0, (activity[today] || 0) + delta);
+  if (activity[today] === 0) delete activity[today];
+  saveActivity(activity);
+}
+
+function showHeatmapTip(e, el) {
+  const tip = document.getElementById('heatmapTooltip');
+  tip.textContent = el.dataset.tip;
+  tip.style.display = 'block';
+  tip.style.left = (e.clientX + 12) + 'px';
+  tip.style.top = (e.clientY - 28) + 'px';
+}
+function hideHeatmapTip() { document.getElementById('heatmapTooltip').style.display = 'none'; }
+
+function renderHeatmap() {
+  const container = document.getElementById('heatmapGrid');
+  if (!container) return;
+  const activity = getActivity();
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const WEEKS = 53;
+  const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const level = n => n <= 0 ? 0 : n === 1 ? 1 : n === 2 ? 2 : n === 3 ? 3 : 4;
+
+  const startDate = new Date(today);
+  startDate.setDate(today.getDate() - today.getDay() - 51 * 7);
+
+  const weeks = [];
+  const cur = new Date(startDate);
+  let total = 0;
+  for (let w = 0; w < WEEKS; w++) {
+    const days = [];
+    for (let d = 0; d < 7; d++) {
+      const ds = cur.getFullYear() + '-' + String(cur.getMonth()+1).padStart(2,'0') + '-' + String(cur.getDate()).padStart(2,'0');
+      const count = activity[ds] || 0;
+      const future = cur > today;
+      if (!future) total += count;
+      days.push({ ds, count, future, month: cur.getMonth() });
+      cur.setDate(cur.getDate() + 1);
+    }
+    weeks.push(days);
+  }
+
+  const monthPositions = [];
+  let lastMonth = -1;
+  for (let w = 0; w < WEEKS; w++) {
+    const mo = weeks[w][0].month;
+    if (mo !== lastMonth) { monthPositions.push({ week: w, name: MONTH_NAMES[mo] }); lastMonth = mo; }
+  }
+  let monthHtml = '<div class="heatmap-day-spacer"></div>';
+  for (let i = 0; i < monthPositions.length; i++) {
+    const start = monthPositions[i].week;
+    const end = i + 1 < monthPositions.length ? monthPositions[i+1].week : WEEKS;
+    const widthPx = (end - start) * 15 - 3;
+    monthHtml += `<div class="heatmap-month-label" style="width:${widthPx}px">${monthPositions[i].name}</div>`;
+  }
+
+  const dayLabels = ['','Mon','','Wed','','Fri',''].map(d => `<div class="heatmap-day-label">${d}</div>`).join('');
+
+  let weeksHtml = '';
+  for (const days of weeks) {
+    let weekHtml = '<div class="heatmap-week">';
+    for (const { ds, count, future } of days) {
+      const lv = future ? 0 : level(count);
+      const tip = future ? '' : count > 0 ? `${count} action${count !== 1 ? 's' : ''} · ${ds}` : `No activity · ${ds}`;
+      weekHtml += `<div class="heatmap-cell" data-level="${lv}"${tip ? ` data-tip="${tip}" onmouseenter="showHeatmapTip(event,this)" onmouseleave="hideHeatmapTip()"` : ''}></div>`;
+    }
+    weekHtml += '</div>';
+    weeksHtml += weekHtml;
+  }
+
+  container.innerHTML = `
+    <div class="heatmap-scroll">
+      <div class="heatmap-inner">
+        <div class="heatmap-month-row">${monthHtml}</div>
+        <div class="heatmap-body-row">
+          <div class="heatmap-day-labels">${dayLabels}</div>
+          <div class="heatmap-weeks">${weeksHtml}</div>
+        </div>
+      </div>
+    </div>
+    <div class="heatmap-footer">
+      <span>${total} action${total !== 1 ? 's' : ''} in the last year</span>
+      <div class="heatmap-legend"><span>Less</span>
+        <div class="heatmap-cell" data-level="0"></div>
+        <div class="heatmap-cell" data-level="1"></div>
+        <div class="heatmap-cell" data-level="2"></div>
+        <div class="heatmap-cell" data-level="3"></div>
+        <div class="heatmap-cell" data-level="4"></div>
+        <span>More</span>
+      </div>
+    </div>`;
+}
+
+// INIT
+// ══════════════════════════════════════════
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeExportModal();
+  if (e.key === 'Enter' && document.getElementById('exportOverlay').classList.contains('open')) {
+    e.preventDefault();
+    confirmExport();
+  }
+});
+buildRoadmap();
+renderLogs();
+buildResources();
+buildPrereqGraph();
+buildLectureTracker();
+buildAssignmentTracker();
+buildPapers();
+renderHeatmap();
+</script>
+<div class="heatmap-tooltip" id="heatmapTooltip"></div>
+</body>
+</html>
