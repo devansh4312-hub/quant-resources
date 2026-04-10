@@ -246,8 +246,8 @@
     let price = H * 0.55;
     for (let i = 0; i < count; i++) {
       const open = price;
-      // Drastically increased multiplier from 45 to 90 for much longer candlestick bodies
-      const close = open + (Math.random() - 0.48) * 90;
+      // Drastically increased multiplier from 45 to 120 for much longer candlestick bodies
+      const close = open + (Math.random() - 0.48) * 120;
       // Wicks relative to the new body size
       const high = Math.max(open, close) + Math.random() * 40;
       const low  = Math.min(open, close) - Math.random() * 40;
