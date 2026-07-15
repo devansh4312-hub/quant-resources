@@ -1,0 +1,2697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solve Log — Multi-Platform Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* Surfaces */
+    --surface-lowest: #080b12;
+    --surface-low: #0f1419;
+    --surface-container: #161b22;
+    --surface-container-high: #1c232b;
+    --bg-input: #0d1117;
+
+    /* Text */
+    --on-surface: #e6edf3;
+    --on-surface-secondary: #8b949e;
+    --on-surface-muted: #6e7681;
+
+    /* Primary accent */
+    --primary: #22d3ee;
+    --primary-dim: rgba(34, 211, 238, 0.15);
+    --secondary: #3b82f6;
+
+    /* Semantic colors */
+    --accent-green: #10b981;
+    --accent-amber: #f59e0b;
+    --accent-red: #ef4444;
+    --accent-purple: #a78bfa;
+    --accent-rose: #f472b6;
+    --accent-sky: #38bdf8;
+    --accent-emerald: #34d399;
+    --accent-yellow: #facc15;
+    --accent-orange: #fb923c;
+    --accent-teal: #2dd4bf;
+    --accent-indigo: #818cf8;
+    --accent-lime: #a3e635;
+    --accent-fuchsia: #e879f9;
+    --accent-slate: #94a3b8;
+
+    /* Borders & shadows */
+    --border-subtle: rgba(240, 246, 252, 0.1);
+    --border-default: rgba(240, 246, 252, 0.15);
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+
+    /* Typography */
+    --font-display: 'Space Grotesk', system-ui, sans-serif;
+    --font-body: 'IBM Plex Sans', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+    /* Type scale */
+    --text-xs: 10px;
+    --text-sm: 12px;
+    --text-base: 14px;
+    --text-lg: 16px;
+    --text-xl: 20px;
+    --text-2xl: 24px;
+
+    /* Radii */
+    --radius-sm: 4px;
+    --radius-md: 6px;
+    --radius-lg: 10px;
+
+    /* Easing */
+    --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+    --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: var(--font-body);
+    background: var(--surface-lowest);
+    background-image: radial-gradient(ellipse at top, rgba(34, 211, 238, 0.03) 0%, transparent 50%);
+    color: var(--on-surface);
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--on-surface-muted); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--on-surface-secondary); }
+
+  ::selection { background: rgba(34, 211, 238, 0.25); color: var(--on-surface); }
+
+  /* ── Top Bar ── */
+  .topbar {
+    background: var(--surface-low);
+    padding: 0 32px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 1px solid var(--border-subtle);
+    box-shadow: var(--shadow-sm);
+  }
+  .topbar-brand {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--primary);
+    display: flex; align-items: center; gap: 10px;
+    text-shadow: 0 0 20px rgba(34, 211, 238, 0.3);
+    white-space: nowrap;
+  }
+  .topbar-brand .log-dot {
+    width: 8px; height: 8px;
+    background: var(--accent-green);
+    border-radius: 50%;
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
+    animation: pulse-dot 2s var(--ease-in-out) infinite;
+  }
+  @keyframes pulse-dot {
+    0%, 100% { box-shadow: 0 0 8px rgba(16,185,129,0.5); }
+    50% { box-shadow: 0 0 16px rgba(16,185,129,0.8), 0 0 0 4px rgba(16,185,129,0.1); }
+  }
+  .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 14px; }
+  .dash-switcher {
+    display: flex; align-items: center; gap: 2px;
+    background: var(--surface-container);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 2px;
+  }
+  .dash-switch-btn {
+    font-family: var(--font-mono); font-size: 10px; font-weight: 600;
+    letter-spacing: 0.05em; padding: 3px 8px; border-radius: 4px;
+    background: transparent; color: var(--on-surface-muted);
+    cursor: pointer; text-decoration: none;
+    display: inline-flex; align-items: center; white-space: nowrap;
+    transition: color 120ms ease, background 120ms ease;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .dash-switch-btn:hover { color: var(--on-surface-secondary); background: var(--surface-container-high); }
+  }
+  .dash-switch-btn:active { transform: scale(0.97); }
+  .dash-switch-btn.active { background: var(--surface-container-high); color: var(--primary); pointer-events: none; }
+  @media (prefers-reduced-motion: reduce) { .dash-switch-btn { transition: none; } }
+  .dash-divider { width: 1px; height: 12px; background: var(--border-subtle); margin: 0 2px; flex-shrink: 0; }
+  .streak-badge {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    color: var(--accent-amber);
+    background: rgba(245, 158, 11, 0.08);
+    border: 1px solid rgba(245, 158, 11, 0.15);
+    padding: 6px 14px;
+    border-radius: var(--radius-md);
+    display: flex; align-items: center; gap: 6px;
+    white-space: nowrap;
+  }
+  .icon-sm { width: 14px; height: 14px; }
+  .topbar-stat {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--on-surface-muted);
+    white-space: nowrap;
+  }
+  .topbar-stat strong { color: var(--accent-green); }
+
+  /* ── Layout ── */
+  .shell {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    min-height: calc(100vh - 56px);
+  }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    background: var(--surface-low);
+    border-right: 1px solid var(--border-subtle);
+    padding: 20px 0;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    max-height: calc(100vh - 56px);
+    position: sticky;
+    top: 56px;
+  }
+  .sidebar-section { padding: 0 12px; margin-bottom: 24px; }
+  .sidebar-label {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--on-surface-muted);
+    margin-bottom: 10px;
+    padding-left: 12px;
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 12px;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-family: var(--font-body);
+    font-size: var(--text-sm); font-weight: 500;
+    color: var(--on-surface-secondary);
+    transition: transform 160ms var(--ease-out), background 150ms var(--ease-out), color 150ms var(--ease-out), border-color 150ms var(--ease-out);
+    border-left: 2px solid transparent;
+    margin-bottom: 2px;
+  }
+  .nav-item:active { transform: scale(0.97); }
+  @media (hover: hover) and (pointer: fine) {
+    .nav-item:hover { background: var(--surface-container); color: var(--on-surface); }
+  }
+  .nav-item.active {
+    background: var(--primary-dim);
+    color: var(--primary);
+    border-left-color: var(--primary);
+    font-weight: 600;
+    box-shadow: inset 0 0 0 1px rgba(34, 211, 238, 0.1), 0 0 12px rgba(34, 211, 238, 0.1);
+  }
+  .nav-item:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--surface-low), 0 0 0 4px var(--primary);
+  }
+  .nav-icon { width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; opacity: 0.6; }
+  .nav-icon svg { width: 16px; height: 16px; }
+  .nav-item.active .nav-icon { opacity: 1; }
+  .nav-badge {
+    margin-left: auto;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs); font-weight: 600;
+    letter-spacing: 0.03em;
+    background: var(--surface-container);
+    padding: 3px 8px;
+    border-radius: var(--radius-sm);
+    color: var(--on-surface-muted);
+    flex-shrink: 0;
+  }
+  .nav-item.active .nav-badge { background: rgba(34,211,238,0.12); color: var(--primary); }
+
+  /* ── Sidebar Footer ── */
+  .sidebar-footer { margin-top: auto; padding: 14px; }
+  .sidebar-progress-label {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs); font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--on-surface-muted);
+    margin-bottom: 10px;
+    display: flex; justify-content: space-between;
+    align-items: center;
+  }
+  .sidebar-progress-label span { color: var(--primary); }
+  .goal-edit-btn {
+    background: none; border: none; cursor: pointer;
+    color: var(--on-surface-muted);
+    font-family: var(--font-mono); font-size: var(--text-xs);
+    padding: 0 2px;
+    transition: color 150ms ease;
+  }
+  .goal-edit-btn:hover { color: var(--primary); }
+  .progress-bar-mini {
+    width: 100%; height: 6px;
+    background: var(--surface-lowest);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    border: 1px solid var(--border-subtle);
+  }
+  .progress-bar-mini-fill {
+    height: 100%; border-radius: var(--radius-sm);
+    background: var(--primary);
+    box-shadow: 0 0 8px rgba(34, 211, 238, 0.4);
+    transition: width 500ms var(--ease-in-out);
+  }
+  .progress-bar-mini-fill.goal-hit { background: var(--accent-green); box-shadow: 0 0 8px rgba(16,185,129,0.5); }
+
+  /* ── Main Content ── */
+  .main {
+    padding: 36px 44px;
+    overflow-y: auto;
+    max-height: calc(100vh - 56px);
+  }
+  .view { display: none; }
+  .view.active { display: block; animation: viewIn 250ms var(--ease-out); }
+  @keyframes viewIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .view.active { animation: none; }
+    .log-dot { animation: none; }
+  }
+
+  /* ── Section Headers ── */
+  .section-header {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+  }
+  .section-header h2 {
+    font-family: var(--font-display);
+    font-size: var(--text-2xl); font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--on-surface);
+  }
+  .tag {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs); font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 5px 12px;
+    border-radius: var(--radius-sm);
+    border: 1px solid transparent;
+  }
+  .tag-cyan { background: rgba(34,211,238,0.1); color: var(--primary); }
+  .tag-green { background: rgba(16,185,129,0.1); color: var(--accent-green); }
+  .tag-amber { background: rgba(245,158,11,0.1); color: var(--accent-amber); }
+  .tag-red { background: rgba(239,68,68,0.1); color: var(--accent-red); }
+  .tag-purple { background: rgba(167,139,250,0.1); color: var(--accent-purple); }
+  .tag-rose { background: rgba(244,114,182,0.1); color: var(--accent-rose); }
+  .tag-sky { background: rgba(56,189,248,0.1); color: var(--accent-sky); }
+  .tag-emerald { background: rgba(52,211,153,0.1); color: var(--accent-emerald); }
+  .tag-yellow { background: rgba(250,204,21,0.1); color: var(--accent-yellow); }
+  .tag-orange { background: rgba(251,146,60,0.1); color: var(--accent-orange); }
+  .tag-teal { background: rgba(45,212,191,0.1); color: var(--accent-teal); }
+  .tag-indigo { background: rgba(129,140,248,0.1); color: var(--accent-indigo); }
+  .tag-lime { background: rgba(163,230,53,0.1); color: var(--accent-lime); }
+  .tag-fuchsia { background: rgba(232,121,249,0.1); color: var(--accent-fuchsia); }
+  .tag-slate { background: rgba(148,163,184,0.1); color: var(--accent-slate); }
+
+  /* ── Stats Grid ── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 14px;
+    margin-bottom: 32px;
+  }
+  .stat-card {
+    background: var(--surface-container);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: 18px;
+    transition: transform 150ms var(--ease-out), box-shadow 150ms var(--ease-out), border-color 150ms var(--ease-out);
+    box-shadow: var(--shadow-sm);
+    cursor: default;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md), 0 0 20px rgba(34, 211, 238, 0.05);
+      border-color: var(--border-default);
+    }
+  }
+  .stat-card-label {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs); font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--on-surface-muted);
+    margin-bottom: 8px;
+  }
+  .stat-card-value {
+    font-family: var(--font-display);
+    font-size: 28px; font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--on-surface);
+  }
+  .stat-card-sub {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--on-surface-muted);
+    margin-top: 4px;
+  }
+  .stat-card-bar {
+    height: 4px;
+    background: var(--surface-lowest);
+    border-radius: var(--radius-sm);
+    margin-top: 12px;
+    overflow: hidden;
+  }
+  .stat-card-bar-fill {
+    height: 100%;
+    border-radius: var(--radius-sm);
+    box-shadow: 0 0 6px currentColor;
+    transition: width 500ms var(--ease-in-out);
+  }
+
+  /* ── Panels ── */
+  .panel {
+    background: var(--surface-container);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: 22px;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow-sm);
+  }
+  .panel-title {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs); font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--on-surface-muted);
+    margin-bottom: 16px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .panel-title svg { width: 14px; height: 14px; }
+  .panels-2col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+  @media (max-width: 1000px) { .panels-2col { grid-template-columns: 1fr; gap: 0; } }
+
+  /* ── Heatmap ── */
+  .heatmap-scroll { overflow-x: auto; padding-bottom: 6px; }
+  .heatmap {
+    display: grid;
+    grid-auto-flow: column;
+    grid-template-rows: repeat(7, 11px);
+    gap: 3px;
+    width: max-content;
+  }
+  .hm-cell {
+    width: 11px; height: 11px;
+    border-radius: 2px;
+    background: var(--surface-lowest);
+    border: 1px solid rgba(240, 246, 252, 0.05);
+  }
+  .hm-cell.l1 { background: rgba(34, 211, 238, 0.22); border-color: transparent; }
+  .hm-cell.l2 { background: rgba(34, 211, 238, 0.45); border-color: transparent; }
+  .hm-cell.l3 { background: rgba(34, 211, 238, 0.7); border-color: transparent; box-shadow: 0 0 4px rgba(34,211,238,0.25); }
+  .hm-cell.l4 { background: var(--primary); border-color: transparent; box-shadow: 0 0 6px rgba(34,211,238,0.5); }
+  .hm-cell.empty { background: transparent; border-color: transparent; }
+  .heatmap-months {
+    display: flex;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--on-surface-muted);
+    margin-bottom: 6px;
+    width: max-content;
+  }
+  .heatmap-legend {
+    display: flex; align-items: center; gap: 4px;
+    font-family: var(--font-mono); font-size: var(--text-xs);
+    color: var(--on-surface-muted);
+    margin-top: 10px;
+  }
+  .heatmap-legend .hm-cell { display: inline-block; }
+
+  /* ── Breakdown Bars ── */
+  .bk-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+  .bk-name {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    width: 130px;
+    flex-shrink: 0;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    color: var(--on-surface-secondary);
+    cursor: pointer;
+    transition: color 150ms ease;
+  }
+  .bk-name:hover { color: var(--primary); }
+  .bk-track {
+    flex: 1; height: 8px;
+    background: var(--surface-lowest);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    border: 1px solid var(--border-subtle);
+  }
+  .bk-fill {
+    height: 100%;
+    border-radius: var(--radius-sm);
+    transition: width 500ms var(--ease-in-out);
+    box-shadow: 0 0 6px currentColor;
+  }
+  .bk-count {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--on-surface-muted);
+    width: 34px; text-align: right; flex-shrink: 0;
+  }
+
+  /* ── Quick Add Form ── */
+  .qa-panel {
+    background: var(--surface-container);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: 20px 22px;
+    margin-bottom: 26px;
+    box-shadow: var(--shadow-sm);
+  }
+  .qa-panel.editing { border-color: rgba(245, 158, 11, 0.35); box-shadow: 0 0 16px rgba(245,158,11,0.08); }
+  .qa-grid {
+    display: grid;
+    grid-template-columns: 2fr 1.2fr 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .qa-grid-2 {
+    display: grid;
+    grid-template-columns: 2fr 1.2fr 1fr;
+    gap: 10px;
+    align-items: end;
+  }
+  @media (max-width: 900px) {
+    .qa-grid, .qa-grid-2 { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 560px) {
+    .qa-grid, .qa-grid-2 { grid-template-columns: 1fr; }
+  }
+  .qa-field label {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs); font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--on-surface-muted);
+    margin-bottom: 5px;
+  }
+  .qa-field input {
+    width: 100%;
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    background: var(--bg-input);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    color: var(--on-surface);
+    padding: 9px 12px;
+    outline: none;
+    transition: border-color 150ms var(--ease-out), box-shadow 150ms var(--ease-out);
+  }
+  .qa-field input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.15), 0 0 16px rgba(34, 211, 238, 0.1);
+  }
+  .qa-field input::placeholder { color: var(--on-surface-muted); }
+  .qa-field input[type="date"] { color-scheme: dark; font-family: var(--font-mono); font-size: var(--text-sm); padding: 9px 10px; }
+  .qa-actions { display: flex; gap: 8px; }
+  .btn-primary {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm); font-weight: 600;
+    letter-spacing: 0.03em;
+    padding: 9px 22px;
+    background: var(--primary);
+    color: #0d1117;
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: opacity 150ms ease, transform 100ms var(--ease-out);
+    box-shadow: 0 0 14px rgba(34, 211, 238, 0.25);
+  }
+  .btn-primary:hover { opacity: 0.88; }
+  .btn-primary:active { transform: scale(0.97); }
+  .btn-primary:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--surface-container), 0 0 0 4px var(--primary); }
+  .btn-ghost {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm); font-weight: 500;
+    padding: 9px 16px;
+    background: transparent;
+    color: var(--on-surface-secondary);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: color 150ms ease, border-color 150ms ease, transform 100ms var(--ease-out);
+  }
+  .btn-ghost:hover { color: var(--on-surface); border-color: var(--on-surface-secondary); }
+  .btn-ghost:active { transform: scale(0.97); }
+
+  /* ── Filter ── */
+  .filter-bar { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; align-items: center; }
+  .filter-bar-label {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs); font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--on-surface-muted);
+    margin-right: 2px;
+  }
+  .filter-chip {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs); font-weight: 600;
+    letter-spacing: 0.04em;
+    padding: 6px 14px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-subtle);
+    background: var(--surface-container);
+    color: var(--on-surface-muted);
+    cursor: pointer;
+    transition: color 150ms var(--ease-out), background 150ms var(--ease-out), border-color 150ms var(--ease-out), transform 100ms var(--ease-out);
+  }
+  .filter-chip:active { transform: scale(0.96); }
+  @media (hover: hover) and (pointer: fine) {
+    .filter-chip:hover { color: var(--on-surface-secondary); border-color: var(--border-default); }
+  }
+  .filter-chip.active {
+    background: var(--primary-dim);
+    color: var(--primary);
+    border-color: rgba(34, 211, 238, 0.2);
+    box-shadow: 0 0 12px rgba(34, 211, 238, 0.15);
+  }
+  .filter-chip:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--surface-lowest), 0 0 0 4px var(--primary);
+  }
+
+  /* ── Search ── */
+  .search-box { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+  .search-box input {
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    background: var(--bg-input);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    color: var(--on-surface);
+    padding: 10px 16px;
+    outline: none;
+    width: 100%;
+    max-width: 400px;
+    transition: border-color 150ms var(--ease-out), box-shadow 150ms var(--ease-out);
+  }
+  .search-box input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.15), 0 0 20px rgba(34, 211, 238, 0.1);
+  }
+  .search-box input::placeholder { color: var(--on-surface-muted); }
+  .result-count {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--on-surface-muted);
+  }
+
+  /* ── Entry Cards ── */
+  .entry-card {
+    background: var(--surface-container);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 14px 18px;
+    margin-bottom: 8px;
+    transition: background 150ms var(--ease-out), border-color 150ms var(--ease-out), box-shadow 150ms var(--ease-out);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .entry-card:hover {
+      background: var(--surface-container-high);
+      border-color: var(--border-default);
+      box-shadow: var(--shadow-sm);
+    }
+  }
+  .entry-top { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .entry-name {
+    font-weight: 600; font-size: var(--text-base);
+    color: var(--on-surface);
+    text-decoration: none;
+  }
+  a.entry-name:hover { color: var(--primary); }
+  a.entry-name::after { content: " ↗"; font-size: var(--text-xs); color: var(--on-surface-muted); }
+  .entry-diff {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs); font-weight: 600;
+    color: var(--accent-amber);
+    background: rgba(245,158,11,0.08);
+    border: 1px solid rgba(245,158,11,0.15);
+    padding: 2px 8px;
+    border-radius: var(--radius-sm);
+  }
+  .entry-date {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--on-surface-muted);
+    margin-left: auto;
+    white-space: nowrap;
+  }
+  .entry-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+  .entry-tag {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--on-surface-secondary);
+    background: var(--surface-lowest);
+    border: 1px solid var(--border-subtle);
+    padding: 2px 9px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: color 150ms ease, border-color 150ms ease;
+  }
+  .entry-tag:hover { color: var(--primary); border-color: rgba(34,211,238,0.3); }
+  .entry-note {
+    font-size: var(--text-sm);
+    color: var(--on-surface-secondary);
+    font-style: italic;
+    margin-top: 6px;
+    line-height: 1.5;
+  }
+  .entry-actions { display: flex; gap: 6px; align-items: center; }
+  .btn-icon {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    padding: 6px;
+    border-radius: var(--radius-sm);
+    background: var(--surface-lowest);
+    color: var(--on-surface-muted);
+    border: none;
+    cursor: pointer;
+    transition: color 150ms var(--ease-out), background 150ms var(--ease-out), transform 100ms var(--ease-out);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .btn-icon svg { width: 14px; height: 14px; }
+  .btn-icon:active { transform: scale(0.9); }
+  .btn-icon:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--surface-container), 0 0 0 4px var(--primary);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .btn-icon:hover { color: var(--on-surface-secondary); background: var(--surface-container-high); }
+    .btn-icon.danger:hover { color: var(--accent-red); background: rgba(239,68,68,0.1); }
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 48px 20px;
+    color: var(--on-surface-muted);
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    border: 1px dashed var(--border-default);
+    border-radius: var(--radius-lg);
+  }
+  .empty-state strong { color: var(--on-surface-secondary); display: block; margin-bottom: 6px; font-size: var(--text-base); }
+
+  .day-group-label {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs); font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--on-surface-muted);
+    margin: 20px 0 8px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .day-group-label::after { content: ""; flex: 1; height: 1px; background: var(--border-subtle); }
+  .day-group-label span { color: var(--on-surface-secondary); }
+
+  /* ── Recent activity (overview) ── */
+  .recent-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border-subtle);
+    font-size: var(--text-sm);
+  }
+  .recent-row:last-child { border-bottom: none; }
+  .recent-name { color: var(--on-surface); font-weight: 500; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .recent-time { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--on-surface-muted); white-space: nowrap; }
+
+  /* ── Trend chart ── */
+  .trend-chart {
+    display: flex; align-items: flex-end; gap: 8px;
+    height: 120px;
+    padding-top: 8px;
+  }
+  .trend-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; height: 100%; justify-content: flex-end; }
+  .trend-bar-track { width: 100%; max-width: 38px; display: flex; align-items: flex-end; height: 100%; }
+  .trend-bar {
+    width: 100%;
+    background: var(--primary);
+    border-radius: 3px 3px 0 0;
+    box-shadow: 0 0 8px rgba(34,211,238,0.25);
+    transition: height 500ms var(--ease-in-out);
+    min-height: 2px;
+  }
+  .trend-bar.zero { background: var(--surface-lowest); border: 1px solid var(--border-subtle); box-shadow: none; }
+  .trend-bar.goal-hit { background: var(--accent-green); box-shadow: 0 0 8px rgba(16,185,129,0.3); }
+  .trend-val { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--on-surface-secondary); }
+  .trend-label { font-family: var(--font-mono); font-size: 9px; color: var(--on-surface-muted); white-space: nowrap; }
+
+  /* ── Revisit ── */
+  .revisit-tag {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs); font-weight: 600;
+    color: var(--accent-amber);
+    background: rgba(245,158,11,0.08);
+    border: 1px solid rgba(245,158,11,0.2);
+    padding: 2px 8px;
+    border-radius: var(--radius-sm);
+    white-space: nowrap;
+  }
+  .entry-card.revisit { border-left: 2px solid var(--accent-amber); }
+  .star-btn { font-size: 14px; line-height: 1; }
+  .star-btn.active { color: var(--accent-yellow); }
+  .entry-star { font-family: var(--font-mono); font-size: var(--text-xs); font-weight: 600; color: var(--accent-yellow); background: rgba(250,204,21,0.08); border: 1px solid rgba(250,204,21,0.2); padding: 2px 8px; border-radius: var(--radius-sm); white-space: nowrap; }
+  .entry-meta-tag { font-family: var(--font-mono); font-size: var(--text-xs); font-weight: 600; padding: 2px 8px; border-radius: var(--radius-sm); white-space: nowrap; border: 1px solid; }
+  .conf-1 { color: var(--accent-red); background: rgba(239,68,68,0.08); border-color: rgba(239,68,68,0.2); }
+  .conf-2 { color: var(--accent-amber); background: rgba(245,158,11,0.08); border-color: rgba(245,158,11,0.2); }
+  .conf-3 { color: var(--accent-green); background: rgba(16,185,129,0.08); border-color: rgba(16,185,129,0.2); }
+  .method-hint { color: var(--accent-sky); background: rgba(56,189,248,0.08); border-color: rgba(56,189,248,0.2); }
+  .method-editorial { color: var(--accent-rose); background: rgba(244,114,182,0.08); border-color: rgba(244,114,182,0.2); }
+  .qa-field select {
+    width: 100%; font-family: var(--font-body); font-size: var(--text-base);
+    background: var(--bg-input); border: 1px solid var(--border-default);
+    border-radius: var(--radius-md); color: var(--on-surface); padding: 9px 12px;
+    outline: none; color-scheme: dark; cursor: pointer;
+    transition: border-color 150ms var(--ease-out), box-shadow 150ms var(--ease-out);
+  }
+  .qa-field select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(34,211,238,0.15); }
+  .entry-mins {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--on-surface-muted);
+    white-space: nowrap;
+  }
+  .qa-check {
+    display: flex; align-items: center; gap: 8px;
+    font-family: var(--font-mono); font-size: var(--text-sm);
+    color: var(--on-surface-secondary);
+    cursor: pointer; user-select: none;
+    padding: 9px 0;
+    white-space: nowrap;
+  }
+  .qa-check input {
+    width: 16px; height: 16px;
+    accent-color: var(--accent-amber);
+    cursor: pointer;
+  }
+
+  /* ── Goals view ── */
+  .goal-set-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 12px;
+    align-items: end;
+  }
+  @media (max-width: 560px) { .goal-set-row { grid-template-columns: 1fr; } }
+  .hit-days { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px; }
+  .hit-day {
+    width: 16px; height: 16px; border-radius: 3px;
+    background: var(--surface-lowest);
+    border: 1px solid var(--border-subtle);
+  }
+  .hit-day.hit { background: var(--accent-green); border-color: transparent; box-shadow: 0 0 5px rgba(16,185,129,0.4); }
+  .hit-day.partial { background: rgba(34,211,238,0.35); border-color: transparent; }
+  .hit-caption { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--on-surface-muted); margin-top: 10px; }
+  .hit-caption strong { color: var(--accent-green); }
+
+  /* ── Toast ── */
+  .toast {
+    position: fixed; bottom: 24px; right: 24px;
+    background: var(--surface-container);
+    border: 1px solid var(--accent-green);
+    color: var(--accent-green);
+    padding: 12px 20px;
+    border-radius: var(--radius-md);
+    font-size: var(--text-base); font-family: var(--font-mono);
+    z-index: 1000;
+    opacity: 0; transform: translateY(10px) scale(0.95);
+    transition: opacity 250ms var(--ease-out), transform 250ms var(--ease-out);
+    pointer-events: none;
+    box-shadow: var(--shadow-lg), 0 0 20px rgba(16, 185, 129, 0.2);
+  }
+  .toast.show { opacity: 1; transform: translateY(0) scale(1); }
+
+  /* ── Export Modal ── */
+  .export-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 900;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none;
+    transition: opacity 200ms ease;
+  }
+  .export-overlay.open { opacity: 1; pointer-events: all; }
+  .export-modal {
+    background: var(--surface-container);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-lg);
+    padding: 28px 28px 24px;
+    width: 420px;
+    max-width: calc(100vw - 32px);
+    box-shadow: var(--shadow-lg);
+    transform: translateY(8px) scale(0.98);
+    transition: transform 220ms var(--ease-out);
+  }
+  .export-overlay.open .export-modal { transform: translateY(0) scale(1); }
+  .export-modal-title {
+    font-family: var(--font-mono);
+    font-size: var(--text-base);
+    font-weight: 600;
+    color: var(--on-surface);
+    margin-bottom: 4px;
+    letter-spacing: 0.03em;
+  }
+  .export-modal-subtitle {
+    font-size: var(--text-sm);
+    color: var(--on-surface-secondary);
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+  .export-field-label {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--on-surface-muted);
+    margin-bottom: 6px;
+  }
+  .export-filename-input {
+    width: 100%;
+    background: var(--bg-input);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    color: var(--on-surface);
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    padding: 9px 12px;
+    outline: none;
+    transition: border-color 150ms ease;
+  }
+  .export-filename-input:focus { border-color: var(--primary); }
+  .export-hint {
+    font-size: var(--text-xs);
+    color: var(--on-surface-muted);
+    margin-top: 8px;
+    line-height: 1.5;
+  }
+  .export-modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 22px; }
+  .export-btn-cancel {
+    padding: 8px 16px;
+    background: transparent;
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    color: var(--on-surface-secondary);
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    cursor: pointer;
+    transition: border-color 150ms ease, color 150ms ease;
+  }
+  .export-btn-cancel:hover { border-color: var(--on-surface-secondary); color: var(--on-surface); }
+  .export-btn-download {
+    padding: 8px 18px;
+    background: var(--primary);
+    border: none;
+    border-radius: var(--radius-md);
+    color: #0d1117;
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 6px;
+    transition: opacity 150ms ease;
+  }
+  .export-btn-download:hover { opacity: 0.88; }
+
+  .csv-chip {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    padding: 6px 14px;
+    border: 1px solid var(--border-default);
+    border-radius: 20px;
+    background: transparent;
+    color: var(--on-surface-secondary);
+    cursor: pointer;
+    transition: border-color 150ms ease, color 150ms ease, background 150ms ease;
+  }
+  .csv-chip:hover { border-color: var(--on-surface-secondary); color: var(--on-surface); }
+  .csv-chip.active { border-color: var(--primary); color: var(--primary); background: var(--primary-dim); }
+
+  /* ── Analytics ── */
+  .analytics-bar-row { display: flex; align-items: center; gap: 10px; padding: 6px 0; }
+  .analytics-bar-label { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--on-surface-secondary); width: 110px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .analytics-bar-track { flex: 1; height: 18px; background: var(--surface-container-high); border-radius: var(--radius-sm); overflow: hidden; position: relative; }
+  .analytics-bar-fill { height: 100%; border-radius: var(--radius-sm); transition: width 400ms var(--ease-out); min-width: 2px; }
+  .analytics-bar-val { font-family: var(--font-mono); font-size: var(--text-xs); font-weight: 600; color: var(--on-surface); width: 44px; text-align: right; flex-shrink: 0; }
+  .analytics-empty { font-family: var(--font-mono); font-size: var(--text-sm); color: var(--on-surface-muted); padding: 18px 0; text-align: center; }
+  .analytics-stacked-row { display: flex; gap: 2px; height: 28px; border-radius: var(--radius-sm); overflow: hidden; margin-bottom: 6px; }
+  .analytics-stacked-seg { transition: width 400ms var(--ease-out); min-width: 0; }
+  .analytics-stacked-legend { display: flex; flex-wrap: wrap; gap: 12px; padding-top: 4px; }
+  .analytics-stacked-legend-item { display: flex; align-items: center; gap: 5px; font-family: var(--font-mono); font-size: var(--text-xs); color: var(--on-surface-secondary); }
+  .analytics-stacked-legend-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+  .analytics-week-label { font-family: var(--font-mono); font-size: 9px; color: var(--on-surface-muted); text-align: center; padding-top: 4px; }
+  .analytics-diff-grid { display: grid; grid-template-columns: auto repeat(8, 1fr); gap: 2px 4px; align-items: end; }
+  .analytics-diff-col { display: flex; flex-direction: column; gap: 2px; }
+
+  /* ── I/O buttons ── */
+  .btn-io {
+    flex: 1;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    padding: 10px 0;
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    background: transparent;
+    color: var(--on-surface-muted);
+    cursor: pointer;
+    transition: transform 160ms var(--ease-out), color 150ms var(--ease-out), border-color 150ms var(--ease-out), background 150ms var(--ease-out);
+  }
+  .btn-io:active { transform: scale(0.95); }
+  .btn-io:focus-visible {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.2);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .btn-io:hover { color: var(--on-surface); border-color: var(--primary); background: var(--primary-dim); }
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 860px) {
+    .shell { grid-template-columns: 1fr; }
+    .sidebar { position: static; max-height: none; border-right: none; border-bottom: 1px solid var(--border-subtle); padding: 14px 0; }
+    .sidebar-footer { margin-top: 8px; }
+    .main { padding: 24px 18px; max-height: none; }
+    .topbar { padding: 0 16px; gap: 10px; overflow-x: auto; }
+    .entry-date { margin-left: 0; width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+  <symbol id="icon-flame" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>
+  </symbol>
+  <symbol id="icon-dashboard" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/>
+  </symbol>
+  <symbol id="icon-list" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+  </symbol>
+  <symbol id="icon-edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+  </symbol>
+  <symbol id="icon-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+  </symbol>
+  <symbol id="icon-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+  </symbol>
+  <symbol id="icon-hash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/>
+  </symbol>
+  <symbol id="icon-layers" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>
+  </symbol>
+  <symbol id="icon-target" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>
+  </symbol>
+  <symbol id="icon-grid" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+  </symbol>
+  <symbol id="icon-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+  </symbol>
+  <symbol id="icon-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+  </symbol>
+</svg>
+
+<div class="topbar">
+  <div class="topbar-brand"><span class="log-dot"></span> Solve Log</div>
+  <div class="topbar-right">
+    <div class="dash-switcher">
+      <a href="../index.html" class="dash-switch-btn">HOME</a>
+      <span class="dash-divider"></span>
+      <a href="quant-finance-dashboard.html" class="dash-switch-btn">QF</a>
+      <a href="brainstellar-dashboard.html" class="dash-switch-btn">BS</a>
+      <a href="cses-tracker.html" class="dash-switch-btn">CSES</a>
+      <a href="solve-log.html" class="dash-switch-btn active">LOG</a>
+    </div>
+    <div class="topbar-stat">Total solved: <strong id="topTotal">0</strong></div>
+    <div class="streak-badge"><svg class="icon-sm"><use href="#icon-flame"/></svg> <span id="streakCount">0</span>d streak</div>
+  </div>
+</div>
+
+<div class="shell">
+  <nav class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Navigation</div>
+      <div class="nav-item active" data-view="overview" onclick="switchView('overview')" tabindex="0" onkeydown="if(event.key==='Enter')switchView('overview')">
+        <span class="nav-icon"><svg><use href="#icon-dashboard"/></svg></span> Overview
+      </div>
+      <div class="nav-item" data-view="log" onclick="switchView('log')" tabindex="0" onkeydown="if(event.key==='Enter')switchView('log')">
+        <span class="nav-icon"><svg><use href="#icon-edit"/></svg></span> Log a Solve
+      </div>
+      <div class="nav-item" data-view="solves" onclick="switchView('solves')" tabindex="0" onkeydown="if(event.key==='Enter')switchView('solves')">
+        <span class="nav-icon"><svg><use href="#icon-search"/></svg></span> Solves
+        <span class="nav-badge" id="navSolvesCount">0</span>
+      </div>
+      <div class="nav-item" data-view="goals" onclick="switchView('goals')" tabindex="0" onkeydown="if(event.key==='Enter')switchView('goals')">
+        <span class="nav-icon"><svg><use href="#icon-target"/></svg></span> Goals
+      </div>
+      <div class="nav-item" data-view="analytics" onclick="switchView('analytics')" tabindex="0" onkeydown="if(event.key==='Enter')switchView('analytics')">
+        <span class="nav-icon"><svg><use href="#icon-chart"/></svg></span> Analytics
+      </div>
+    </div>
+    <div class="sidebar-section" id="navPlatforms">
+      <div class="sidebar-label">Platforms</div>
+      <div id="platformNavList"></div>
+    </div>
+    <div class="sidebar-footer">
+      <div class="sidebar-progress-label">
+        <span style="color:var(--on-surface-muted)">Daily goal</span>
+        <span id="dailyGoalLabel">0/0</span>
+      </div>
+      <div class="progress-bar-mini">
+        <div class="progress-bar-mini-fill" id="dailyGoalBar" style="width:0%"></div>
+      </div>
+      <div class="sidebar-progress-label" style="margin-top:10px">
+        <span style="color:var(--on-surface-muted)">Weekly goal <button class="goal-edit-btn" onclick="editGoal()" title="Edit goals">✎</button></span>
+        <span id="goalLabel">0/0</span>
+      </div>
+      <div class="progress-bar-mini">
+        <div class="progress-bar-mini-fill" id="goalBar" style="width:0%"></div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:14px;">
+        <button class="btn-io" onclick="exportData()">↓ JSON</button>
+        <button class="btn-io" onclick="exportCSV()">↓ CSV</button>
+        <button class="btn-io" onclick="document.getElementById('importFile').click()">↑ Import</button>
+        <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(this)">
+      </div>
+      <div style="display:flex;gap:8px;margin-top:8px;">
+        <button class="btn-io" onclick="openCFImport()" style="flex:1" title="Import solved problems from Codeforces">↗ Codeforces Import</button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="main">
+
+    <!-- ═══ OVERVIEW VIEW ═══ -->
+    <section class="view active" id="view-overview">
+      <div class="section-header">
+        <h2>Overview</h2>
+        <span class="tag tag-cyan">All Platforms</span>
+      </div>
+
+      <div class="stats-grid" id="statsGrid"></div>
+
+      <div class="panel">
+        <div class="panel-title"><svg><use href="#icon-grid"/></svg> Activity — last 12 months</div>
+        <div class="heatmap-scroll">
+          <div class="heatmap-months" id="heatmapMonths"></div>
+          <div class="heatmap" id="heatmap"></div>
+        </div>
+        <div class="heatmap-legend">
+          Less
+          <span class="hm-cell"></span><span class="hm-cell l1"></span><span class="hm-cell l2"></span><span class="hm-cell l3"></span><span class="hm-cell l4"></span>
+          More
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title"><svg><use href="#icon-clock"/></svg> Solves per week — last 12 weeks</div>
+        <div class="trend-chart" id="trendChart"></div>
+      </div>
+
+      <div class="panels-2col">
+        <div class="panel">
+          <div class="panel-title"><svg><use href="#icon-layers"/></svg> By platform</div>
+          <div id="platformBreakdown"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-title"><svg><use href="#icon-hash"/></svg> Top topics</div>
+          <div id="tagBreakdown"></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title"><svg><use href="#icon-layers"/></svg> Difficulty distribution</div>
+        <div id="diffBreakdown"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title"><svg><use href="#icon-clock"/></svg> Recent solves</div>
+        <div id="recentList"></div>
+      </div>
+    </section>
+
+    <!-- ═══ LOG VIEW (add only) ═══ -->
+    <section class="view" id="view-log">
+      <div class="section-header">
+        <h2>Log a Solve</h2>
+        <span class="tag tag-green">Quick Add</span>
+      </div>
+
+      <div class="qa-panel" id="qaPanel">
+        <div class="panel-title" id="qaTitle">Log a solve <span style="text-transform:none;letter-spacing:0;font-weight:400">— press <b>n</b> anywhere to jump here</span></div>
+        <div class="qa-grid">
+          <div class="qa-field">
+            <label for="qaName">Question name *</label>
+            <input id="qaName" type="text" placeholder="e.g. Two Sum, 1520D, Josephus Problem…" onkeydown="qaEnter(event)">
+          </div>
+          <div class="qa-field">
+            <label for="qaPlatform">Platform * <span style="text-transform:none;letter-spacing:0">(pick or type your own)</span></label>
+            <input id="qaPlatform" type="text" list="platformSuggest" placeholder="Pick from list or type any platform…" onkeydown="qaEnter(event)">
+            <datalist id="platformSuggest"></datalist>
+          </div>
+          <div class="qa-field">
+            <label for="qaDifficulty">Difficulty</label>
+            <input id="qaDifficulty" type="text" placeholder="1400 / Medium / D…" onkeydown="qaEnter(event)">
+          </div>
+          <div class="qa-field">
+            <label for="qaDate">Date solved</label>
+            <input id="qaDate" type="date">
+          </div>
+        </div>
+        <div class="qa-grid-2">
+          <div class="qa-field">
+            <label for="qaTags">Topics <span style="text-transform:none;letter-spacing:0">(comma separated)</span></label>
+            <input id="qaTags" type="text" list="tagSuggest" placeholder="dp, graphs, binary search" onkeydown="qaEnter(event)">
+            <datalist id="tagSuggest"></datalist>
+          </div>
+          <div class="qa-field">
+            <label for="qaUrl">Link</label>
+            <input id="qaUrl" type="url" placeholder="https://…" onkeydown="qaEnter(event)">
+          </div>
+          <div class="qa-actions">
+            <button class="btn-primary" id="qaSubmit" onclick="submitEntry()">+ Add solve</button>
+            <button class="btn-ghost" id="qaCancel" onclick="cancelEdit()" style="display:none">Cancel</button>
+          </div>
+        </div>
+        <div class="qa-grid-2" style="margin-top:10px; grid-template-columns: 1fr 130px 130px 130px; align-items:end;">
+          <div class="qa-field">
+            <label for="qaNote">Note</label>
+            <input id="qaNote" type="text" placeholder="Anything worth remembering — trick, mistake, pattern…" onkeydown="qaEnter(event)">
+          </div>
+          <div class="qa-field">
+            <label for="qaMins">Time (min)</label>
+            <input id="qaMins" type="number" min="0" step="1" placeholder="—" onkeydown="qaEnter(event)">
+          </div>
+          <div class="qa-field">
+            <label for="qaConfidence">Confidence</label>
+            <select id="qaConfidence">
+              <option value="">—</option>
+              <option value="1">1 — Shaky</option>
+              <option value="2">2 — Solid</option>
+              <option value="3">3 — Crushed</option>
+            </select>
+          </div>
+          <div class="qa-field">
+            <label for="qaMethod">How solved</label>
+            <select id="qaMethod">
+              <option value="">—</option>
+              <option value="solo">Solo</option>
+              <option value="hint">With hints</option>
+              <option value="editorial">Editorial</option>
+            </select>
+          </div>
+        </div>
+        <div class="qa-grid-2" style="margin-top:10px; grid-template-columns: 130px auto auto auto auto; align-items:end;">
+          <div class="qa-field">
+            <label for="qaAttempt">Attempt #</label>
+            <input id="qaAttempt" type="number" min="1" step="1" placeholder="1" onkeydown="qaEnter(event)">
+          </div>
+          <label class="qa-check" for="qaStar" title="Star this problem — e.g. elegant solution, great learning">
+            <input id="qaStar" type="checkbox" style="accent-color: var(--accent-yellow)"> ★ Star
+          </label>
+          <label class="qa-check" for="qaRevisit" title="Mark to redo later — e.g. solved with editorial help">
+            <input id="qaRevisit" type="checkbox"> ↺ Revisit later
+          </label>
+          <label class="qa-check" for="qaContest" title="Solved during a live or virtual contest (vs practice)">
+            <input id="qaContest" type="checkbox" style="accent-color: var(--accent-purple)"> 🏆 In contest
+          </label>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title"><svg><use href="#icon-clock"/></svg> Recently added</div>
+        <div id="recentAdds"></div>
+      </div>
+    </section>
+
+    <!-- ═══ SOLVES VIEW (browse/filter) ═══ -->
+    <section class="view" id="view-solves">
+      <div class="section-header">
+        <h2>Solves</h2>
+        <span class="tag tag-cyan" id="logHeaderCount">0 solved</span>
+      </div>
+
+      <div id="platformStats" style="display:none"></div>
+
+      <div class="filter-bar" id="platformFilterBar"></div>
+      <div class="filter-bar" id="dateFilterBar">
+        <span class="filter-bar-label">When</span>
+        <button class="filter-chip active" data-range="all" onclick="setDateFilter('all', this)">All time</button>
+        <button class="filter-chip" data-range="7" onclick="setDateFilter('7', this)">Last 7 days</button>
+        <button class="filter-chip" data-range="30" onclick="setDateFilter('30', this)">Last 30 days</button>
+        <span class="filter-bar-label" style="margin-left:10px">Show</span>
+        <button class="filter-chip active" data-show="all" onclick="setShowFilter('all', this)">All</button>
+        <button class="filter-chip" data-show="revisit" onclick="setShowFilter('revisit', this)">↺ To revisit <span id="revisitCount"></span></button>
+        <button class="filter-chip" data-show="contest" onclick="setShowFilter('contest', this)">🏆 Contest <span id="contestCount"></span></button>
+        <button class="filter-chip" data-show="starred" onclick="setShowFilter('starred', this)">★ Starred <span id="starredCount"></span></button>
+        <button class="filter-chip" data-show="plain" onclick="setShowFilter('plain', this)">Practice only</button>
+      </div>
+      <div class="filter-bar" id="tagFilterBar" style="display:none">
+        <span class="filter-bar-label">Topic</span>
+        <span id="activeTagChipHolder"></span>
+      </div>
+
+      <div class="search-box">
+        <input id="logSearch" type="text" placeholder="Search by name, platform, topic, note…  (press / )" oninput="setSearch(this.value)">
+        <span class="result-count" id="resultCount"></span>
+      </div>
+
+      <div class="filter-bar" id="sortBar">
+        <span class="filter-bar-label">Sort</span>
+        <button class="filter-chip active" data-sort="date" onclick="setSortOrder('date', this)">Date</button>
+        <button class="filter-chip" data-sort="difficulty" onclick="setSortOrder('difficulty', this)">Difficulty</button>
+        <button class="filter-chip" data-sort="platform" onclick="setSortOrder('platform', this)">Platform</button>
+        <button class="filter-chip" data-sort="time" onclick="setSortOrder('time', this)">Time spent</button>
+      </div>
+
+      <div id="logList"></div>
+    </section>
+
+    <!-- ═══ GOALS VIEW ═══ -->
+    <section class="view" id="view-goals">
+      <div class="section-header">
+        <h2>Goals</h2>
+        <span class="tag tag-amber">Daily &amp; Weekly</span>
+      </div>
+
+      <div class="stats-grid" id="goalStatsGrid"></div>
+
+      <div class="panel">
+        <div class="panel-title"><svg><use href="#icon-target"/></svg> Set your goals</div>
+        <div class="goal-set-row">
+          <div class="qa-field">
+            <label for="goalDailyInput">Daily goal (solves / day)</label>
+            <input id="goalDailyInput" type="number" min="1" step="1">
+          </div>
+          <div class="qa-field">
+            <label for="goalWeeklyInput">Weekly goal (solves / week)</label>
+            <input id="goalWeeklyInput" type="number" min="1" step="1">
+          </div>
+          <div class="qa-actions">
+            <button class="btn-primary" onclick="saveGoals()">Save goals</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title"><svg><use href="#icon-grid"/></svg> Daily goal — last 30 days</div>
+        <div class="hit-days" id="dailyHitDays"></div>
+        <div class="hit-caption" id="dailyHitCaption"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title"><svg><use href="#icon-grid"/></svg> Weekly goal — last 12 weeks</div>
+        <div class="hit-days" id="weeklyHitDays"></div>
+        <div class="hit-caption" id="weeklyHitCaption"></div>
+      </div>
+    </section>
+
+    <!-- ═══ ANALYTICS VIEW ═══ -->
+    <section class="view" id="view-analytics">
+      <div class="section-header">
+        <h2>Analytics</h2>
+        <span class="tag tag-cyan">Insights</span>
+      </div>
+      <div class="stats-grid" id="analyticsStats"></div>
+      <div class="panels-2col">
+        <div class="panel">
+          <div class="panel-title"><svg><use href="#icon-clock"/></svg> Avg time by difficulty</div>
+          <div id="analyticsTimeDiff"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-title"><svg><use href="#icon-clock"/></svg> Avg time by platform</div>
+          <div id="analyticsTimePlat"></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-title"><svg><use href="#icon-chart"/></svg> Difficulty progression — last 8 weeks</div>
+        <div id="analyticsDiffProg"></div>
+      </div>
+      <div class="panels-2col">
+        <div class="panel">
+          <div class="panel-title"><svg><use href="#icon-hash"/></svg> Weakest topics</div>
+          <div id="analyticsWeakTopics"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-title"><svg><use href="#icon-layers"/></svg> Confidence breakdown</div>
+          <div id="analyticsConfidence"></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-title"><svg><use href="#icon-layers"/></svg> Method breakdown</div>
+        <div id="analyticsMethod"></div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<div class="export-overlay" id="cfOverlay" onclick="if(event.target===this)closeCFModal()">
+  <div class="export-modal" style="width:440px">
+    <div class="export-modal-title">Import from Codeforces</div>
+    <div class="export-modal-subtitle">Enter your Codeforces handle to import all accepted submissions.</div>
+    <div class="export-field-label">Handle</div>
+    <input class="export-filename-input" id="cfHandle" type="text" spellcheck="false" placeholder="e.g. tourist" onkeydown="if(event.key==='Enter')fetchCF()" />
+    <div id="cfStatus" style="font-family:var(--font-mono);font-size:var(--text-xs);color:var(--on-surface-muted);margin-top:8px;min-height:18px;"></div>
+    <div class="export-modal-actions">
+      <button class="export-btn-cancel" onclick="closeCFModal()">Cancel</button>
+      <button class="export-btn-download" id="cfImportBtn" onclick="fetchCF()">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 1v9m0 0L5 7m3 3 3-3M2 13h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Import
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="export-overlay" id="csvOverlay" onclick="if(event.target===this)closeCsvModal()">
+  <div class="export-modal" style="width:460px">
+    <div class="export-modal-title">Export CSV</div>
+    <div class="export-modal-subtitle">Choose which platform to export, or export all.</div>
+    <div class="export-field-label">Platform</div>
+    <div id="csvPlatformChips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;"></div>
+    <div class="export-modal-actions">
+      <button class="export-btn-cancel" onclick="closeCsvModal()">Cancel</button>
+      <button class="export-btn-download" onclick="confirmCSVExport()">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 1v9m0 0L5 7m3 3 3-3M2 13h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Download CSV
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="export-overlay" id="exportOverlay" onclick="handleOverlayClick(event)">
+  <div class="export-modal">
+    <div class="export-modal-title">Export Solve Log</div>
+    <div class="export-modal-subtitle">Your data will be saved as a JSON file.</div>
+    <div class="export-field-label">Filename</div>
+    <input class="export-filename-input" id="exportFilename" type="text" spellcheck="false" />
+    <div class="export-hint">A save dialog will open so you can choose where to store the file.</div>
+    <div class="export-modal-actions">
+      <button class="export-btn-cancel" onclick="closeExportModal()">Cancel</button>
+      <button class="export-btn-download" onclick="confirmExport()">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 1v9m0 0L5 7m3 3 3-3M2 13h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Download
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════
+//  SOLVE LOG — multi-platform question tracker
+//  Data lives in localStorage under 'solvelog_state'
+// ═══════════════════════════════════════════════════
+
+const LS_KEY = 'solvelog_state';
+let state = { entries: [], weeklyGoal: 10, dailyGoal: 2 };
+try {
+  const raw = JSON.parse(localStorage.getItem(LS_KEY) || '{}');
+  if (Array.isArray(raw.entries)) state.entries = raw.entries;
+  if (typeof raw.weeklyGoal === 'number' && raw.weeklyGoal > 0) state.weeklyGoal = raw.weeklyGoal;
+  if (typeof raw.dailyGoal === 'number' && raw.dailyGoal > 0) state.dailyGoal = raw.dailyGoal;
+} catch (e) { /* corrupted state — start fresh */ }
+
+function save() { localStorage.setItem(LS_KEY, JSON.stringify(state)); }
+
+// ── Helpers ──────────────────────────────────────
+function esc(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+function escAttr(s) { return esc(s).replace(/"/g, '&quot;'); }
+function todayStr() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+function dateFromStr(s) { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); }
+function fmtDate(s) {
+  const d = dateFromStr(s);
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+function daysAgo(s) {
+  const ms = dateFromStr(todayStr()) - dateFromStr(s);
+  return Math.round(ms / 86400000);
+}
+function relDay(s) {
+  const n = daysAgo(s);
+  if (n === 0) return 'Today';
+  if (n === 1) return 'Yesterday';
+  if (n < 7) return n + ' days ago';
+  return fmtDate(s);
+}
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// Deterministic color per platform / tag
+const TAG_COLORS = ['cyan','green','amber','purple','rose','sky','emerald','yellow','orange','teal','indigo','lime','fuchsia','slate'];
+const ACCENT_VARS = ['--primary','--accent-green','--accent-amber','--accent-purple','--accent-rose','--accent-sky','--accent-emerald','--accent-yellow','--accent-orange','--accent-teal','--accent-indigo','--accent-lime','--accent-fuchsia','--accent-slate'];
+function hashStr(s) {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) { h = ((h << 5) - h + s.charCodeAt(i)) | 0; }
+  return Math.abs(h);
+}
+function platformColorClass(p) { return 'tag-' + TAG_COLORS[hashStr(p.toLowerCase()) % TAG_COLORS.length]; }
+function platformColorVar(p) { return ACCENT_VARS[hashStr(p.toLowerCase()) % ACCENT_VARS.length]; }
+
+// Normalize platform display (case-insensitive dedupe, keep first-seen casing)
+function canonicalPlatform(name) {
+  const lower = name.trim().toLowerCase();
+  const found = state.entries.find(e => e.platform.toLowerCase() === lower);
+  return found ? found.platform : name.trim();
+}
+
+// ── Derived data ─────────────────────────────────
+function countsByDate() {
+  const m = {};
+  for (const e of state.entries) m[e.date] = (m[e.date] || 0) + 1;
+  return m;
+}
+function platformCounts() {
+  const m = {};
+  for (const e of state.entries) m[e.platform] = (m[e.platform] || 0) + 1;
+  return Object.entries(m).sort((a, b) => b[1] - a[1]);
+}
+function tagCounts() {
+  const m = {};
+  for (const e of state.entries) for (const t of (e.tags || [])) m[t] = (m[t] || 0) + 1;
+  return Object.entries(m).sort((a, b) => b[1] - a[1]);
+}
+function computeStreaks() {
+  const days = countsByDate();
+  // current streak: consecutive days ending today (or yesterday, so today doesn't break it before you solve)
+  let current = 0;
+  const start = days[todayStr()] ? 0 : 1;
+  for (let i = start; ; i++) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    const key = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    if (days[key]) current++; else break;
+  }
+  // longest streak
+  const sorted = Object.keys(days).sort();
+  let longest = 0, run = 0, prev = null;
+  for (const k of sorted) {
+    if (prev && (dateFromStr(k) - dateFromStr(prev)) === 86400000) run++;
+    else run = 1;
+    longest = Math.max(longest, run);
+    prev = k;
+  }
+  return { current, longest };
+}
+function diffBucket(d) {
+  if (!d) return null;
+  const s = d.trim().toLowerCase();
+  const digits = s.replace(/[^0-9]/g, '');
+  if (digits.length >= 3) {
+    const n = parseInt(digits, 10);
+    if (n < 1200) return '&lt; 1200';
+    if (n < 1600) return '1200–1599';
+    if (n < 2000) return '1600–1999';
+    return '2000+';
+  }
+  if (/easy|beginner|cakewalk|basic|school/.test(s)) return 'Easy';
+  if (/med/.test(s)) return 'Medium';
+  if (/hard|difficult|expert|advanced/.test(s)) return 'Hard';
+  return 'Other';
+}
+function diffSortVal(d) {
+  if (!d) return 99999;
+  const s = d.trim().toLowerCase();
+  const digits = s.replace(/[^0-9]/g, '');
+  if (digits.length >= 3) return parseInt(digits, 10);
+  if (/easy|beginner|cakewalk|basic|school/.test(s)) return 100;
+  if (/med/.test(s)) return 200;
+  if (/hard|difficult|expert|advanced/.test(s)) return 300;
+  return 50000;
+}
+const DIFF_ORDER = ['Easy', 'Medium', 'Hard', '&lt; 1200', '1200–1599', '1600–1999', '2000+', 'Other'];
+const DIFF_COLOR = { 'Easy': '--accent-green', 'Medium': '--accent-amber', 'Hard': '--accent-red', '&lt; 1200': '--accent-emerald', '1200–1599': '--accent-sky', '1600–1999': '--accent-purple', '2000+': '--accent-rose', 'Other': '--accent-slate' };
+function diffCounts() {
+  const m = {};
+  let untagged = 0;
+  for (const e of state.entries) {
+    const b = diffBucket(e.difficulty);
+    if (b) m[b] = (m[b] || 0) + 1; else untagged++;
+  }
+  return { rows: DIFF_ORDER.filter(b => m[b]).map(b => [b, m[b]]), untagged };
+}
+// Rolling 7-day buckets, index 0 = current week (last 7 days), 11 = oldest
+function weekBuckets(n = 12) {
+  const buckets = new Array(n).fill(0);
+  for (const e of state.entries) {
+    const d = daysAgo(e.date);
+    if (d < 0) continue;
+    const w = Math.floor(d / 7);
+    if (w < n) buckets[w]++;
+  }
+  return buckets;
+}
+function minsStats() {
+  const timed = state.entries.filter(e => e.mins > 0);
+  if (!timed.length) return null;
+  const total = timed.reduce((s, e) => s + e.mins, 0);
+  return { avg: Math.round(total / timed.length), total, count: timed.length };
+}
+function weekCount() {
+  return state.entries.filter(e => daysAgo(e.date) < 7 && daysAgo(e.date) >= 0).length;
+}
+function monthCount() {
+  return state.entries.filter(e => daysAgo(e.date) < 30 && daysAgo(e.date) >= 0).length;
+}
+
+// ── Filters state ────────────────────────────────
+let activePlatform = 'all';
+let activeDateRange = 'all';
+let activeTag = null;
+let searchQuery = '';
+let showMode = 'all'; // 'all' | 'revisit' | 'contest' | 'starred'
+let sortOrder = 'date';
+
+// ── Views ────────────────────────────────────────
+function switchView(v) {
+  document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+  document.getElementById('view-' + v).classList.add('active');
+  document.querySelectorAll('.nav-item[data-view]').forEach(el =>
+    el.classList.toggle('active', el.dataset.view === v));
+  if (v === 'log') setTimeout(() => document.getElementById('qaName').focus(), 100);
+  if (v === 'solves') setTimeout(() => document.getElementById('logSearch').focus(), 100);
+}
+
+// ── Render: everything ───────────────────────────
+function renderAll() {
+  renderTopbar();
+  renderSidebar();
+  renderOverview();
+  renderRecentAdds();
+  renderFilters();
+  renderLog();
+  renderGoals();
+  renderAnalytics();
+  renderSuggestions();
+}
+
+function renderTopbar() {
+  document.getElementById('topTotal').textContent = state.entries.length;
+  document.getElementById('streakCount').textContent = computeStreaks().current;
+}
+
+function renderSidebar() {
+  document.getElementById('navSolvesCount').textContent = state.entries.length;
+
+  const pc = platformCounts();
+  const list = document.getElementById('platformNavList');
+  if (!pc.length) {
+    list.innerHTML = '<div style="padding:4px 12px;font-family:var(--font-mono);font-size:var(--text-xs);color:var(--on-surface-muted)">Nothing logged yet</div>';
+  } else {
+    list.innerHTML = pc.map(([p, n]) => `
+      <div class="nav-item ${activePlatform === p ? 'active' : ''}" tabindex="0"
+           onclick="goToPlatform('${escAttr(p)}')" onkeydown="if(event.key==='Enter')goToPlatform('${escAttr(p)}')">
+        <span class="nav-icon" style="opacity:1"><span style="width:8px;height:8px;border-radius:50%;background:var(${platformColorVar(p)});display:block"></span></span>
+        ${esc(p)}
+        <span class="nav-badge">${n}</span>
+      </div>`).join('');
+  }
+
+  // Daily goal
+  const days = countsByDate();
+  const todaySolves = days[todayStr()] || 0;
+  const dGoal = state.dailyGoal;
+  const dPct = Math.min(100, Math.round(todaySolves / dGoal * 100));
+  document.getElementById('dailyGoalLabel').textContent = todaySolves + '/' + dGoal;
+  const dBar = document.getElementById('dailyGoalBar');
+  dBar.style.width = dPct + '%';
+  dBar.classList.toggle('goal-hit', todaySolves >= dGoal);
+
+  // Weekly goal
+  const wk = weekCount();
+  const goal = state.weeklyGoal;
+  const pct = Math.min(100, Math.round(wk / goal * 100));
+  document.getElementById('goalLabel').textContent = wk + '/' + goal;
+  const bar = document.getElementById('goalBar');
+  bar.style.width = pct + '%';
+  bar.classList.toggle('goal-hit', wk >= goal);
+}
+
+function goToPlatform(p) {
+  activePlatform = p;
+  switchView('solves');
+  renderFilters();
+  renderLog();
+  renderSidebar();
+}
+
+function editGoal() {
+  switchView('goals');
+  setTimeout(() => document.getElementById('goalWeeklyInput').focus(), 150);
+}
+
+function saveGoals() {
+  const d = parseInt(document.getElementById('goalDailyInput').value, 10);
+  const w = parseInt(document.getElementById('goalWeeklyInput').value, 10);
+  if (!d || d < 1 || !w || w < 1) { showToast('Goals must be numbers ≥ 1'); return; }
+  state.dailyGoal = d;
+  state.weeklyGoal = w;
+  save();
+  renderAll();
+  showToast('Goals saved: ' + d + '/day, ' + w + '/week');
+}
+
+function renderGoals() {
+  const days = countsByDate();
+  const today = days[todayStr()] || 0;
+  const wk = weekCount();
+  const dGoal = state.dailyGoal, wGoal = state.weeklyGoal;
+  const dPct = Math.min(100, Math.round(today / dGoal * 100));
+  const wPct = Math.min(100, Math.round(wk / wGoal * 100));
+
+  document.getElementById('goalStatsGrid').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-card-label">Today</div>
+      <div class="stat-card-value">${today}<span style="font-size:16px;color:var(--on-surface-muted)"> / ${dGoal}</span></div>
+      <div class="stat-card-sub">${today >= dGoal ? 'daily goal hit ✓' : (dGoal - today) + ' to go today'}</div>
+      <div class="stat-card-bar"><div class="stat-card-bar-fill" style="width:${dPct}%;background:${today >= dGoal ? 'var(--accent-green)' : 'var(--primary)'};color:${today >= dGoal ? 'var(--accent-green)' : 'var(--primary)'}"></div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-label">This Week</div>
+      <div class="stat-card-value">${wk}<span style="font-size:16px;color:var(--on-surface-muted)"> / ${wGoal}</span></div>
+      <div class="stat-card-sub">${wk >= wGoal ? 'weekly goal hit ✓' : (wGoal - wk) + ' to go this week'}</div>
+      <div class="stat-card-bar"><div class="stat-card-bar-fill" style="width:${wPct}%;background:${wk >= wGoal ? 'var(--accent-green)' : 'var(--primary)'};color:${wk >= wGoal ? 'var(--accent-green)' : 'var(--primary)'}"></div></div>
+    </div>`;
+
+  document.getElementById('goalDailyInput').value = dGoal;
+  document.getElementById('goalWeeklyInput').value = wGoal;
+
+  // Daily goal: last 30 days, oldest → newest
+  let dHtml = '', dHits = 0;
+  for (let i = 29; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    const key = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    const n = days[key] || 0;
+    const cls = n >= dGoal ? 'hit' : n > 0 ? 'partial' : '';
+    if (n >= dGoal) dHits++;
+    dHtml += `<div class="hit-day ${cls}" title="${key}: ${n} solve${n === 1 ? '' : 's'}"></div>`;
+  }
+  document.getElementById('dailyHitDays').innerHTML = dHtml;
+  document.getElementById('dailyHitCaption').innerHTML =
+    `Hit on <strong>${dHits}</strong> of the last 30 days · green = goal hit, cyan = solved something`;
+
+  // Weekly goal: last 12 rolling weeks, oldest → newest
+  const buckets = weekBuckets(12);
+  let wHtml = '', wHits = 0;
+  for (let i = 11; i >= 0; i--) {
+    const n = buckets[i];
+    const cls = n >= wGoal ? 'hit' : n > 0 ? 'partial' : '';
+    if (n >= wGoal) wHits++;
+    const label = i === 0 ? 'this week' : i + 'w ago';
+    wHtml += `<div class="hit-day ${cls}" style="width:24px;height:24px" title="${label}: ${n} solve${n === 1 ? '' : 's'}"></div>`;
+  }
+  document.getElementById('weeklyHitDays').innerHTML = wHtml;
+  document.getElementById('weeklyHitCaption').innerHTML =
+    `Hit in <strong>${wHits}</strong> of the last 12 weeks`;
+}
+
+// ── Render: overview ─────────────────────────────
+function renderOverview() {
+  const total = state.entries.length;
+  const days = countsByDate();
+  const todaySolves = days[todayStr()] || 0;
+  const dGoal = state.dailyGoal;
+  const dPct = Math.min(100, Math.round(todaySolves / dGoal * 100));
+  const wk = weekCount();
+  const mo = monthCount();
+  const { current, longest } = computeStreaks();
+  const platforms = platformCounts().length;
+  const goal = state.weeklyGoal;
+  const goalPct = Math.min(100, Math.round(wk / goal * 100));
+
+  document.getElementById('statsGrid').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-card-label">Total Solved</div>
+      <div class="stat-card-value">${total}</div>
+      <div class="stat-card-sub">across ${platforms} platform${platforms === 1 ? '' : 's'}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-label">Today</div>
+      <div class="stat-card-value">${todaySolves}<span style="font-size:16px;color:var(--on-surface-muted)"> / ${dGoal}</span></div>
+      <div class="stat-card-sub">${todaySolves >= dGoal ? 'daily goal hit ✓' : (dGoal - todaySolves) + ' to go today'}</div>
+      <div class="stat-card-bar"><div class="stat-card-bar-fill" style="width:${dPct}%;background:${todaySolves >= dGoal ? 'var(--accent-green)' : 'var(--accent-amber)'};color:${todaySolves >= dGoal ? 'var(--accent-green)' : 'var(--accent-amber)'}"></div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-label">This Week</div>
+      <div class="stat-card-value">${wk}<span style="font-size:16px;color:var(--on-surface-muted)"> / ${goal}</span></div>
+      <div class="stat-card-sub">${wk >= goal ? 'weekly goal hit ✓' : (goal - wk) + ' to go'}</div>
+      <div class="stat-card-bar"><div class="stat-card-bar-fill" style="width:${goalPct}%;background:${wk >= goal ? 'var(--accent-green)' : 'var(--primary)'};color:${wk >= goal ? 'var(--accent-green)' : 'var(--primary)'}"></div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-label">This Month</div>
+      <div class="stat-card-value">${mo}</div>
+      <div class="stat-card-sub">last 30 days</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-label">Current Streak</div>
+      <div class="stat-card-value" style="color:var(--accent-amber)">${current}<span style="font-size:16px">d</span></div>
+      <div class="stat-card-sub">longest: ${longest}d</div>
+    </div>
+    ${(() => {
+      const ms = minsStats();
+      if (!ms) return '';
+      const hrs = (ms.total / 60).toFixed(1);
+      return `<div class="stat-card">
+        <div class="stat-card-label">Avg Time / Solve</div>
+        <div class="stat-card-value">${ms.avg}<span style="font-size:16px;color:var(--on-surface-muted)">m</span></div>
+        <div class="stat-card-sub">${hrs}h across ${ms.count} timed solve${ms.count === 1 ? '' : 's'}</div>
+      </div>`;
+    })()}
+    ${(() => {
+      const ct = state.entries.filter(e => e.contest).length;
+      if (!ct) return '';
+      const pr = total - ct;
+      const pct = Math.round(ct / total * 100);
+      return `<div class="stat-card">
+        <div class="stat-card-label">In Contest</div>
+        <div class="stat-card-value" style="color:var(--accent-purple)">${ct}</div>
+        <div class="stat-card-sub">${pct}% · vs ${pr} in practice</div>
+        <div class="stat-card-bar"><div class="stat-card-bar-fill" style="width:${pct}%;background:var(--accent-purple);color:var(--accent-purple)"></div></div>
+      </div>`;
+    })()}`;
+
+  renderHeatmap();
+  renderTrend();
+
+  // Difficulty distribution
+  const dc = diffCounts();
+  const maxD = dc.rows.length ? Math.max(...dc.rows.map(r => r[1])) : 1;
+  document.getElementById('diffBreakdown').innerHTML = dc.rows.length
+    ? dc.rows.map(([b, n]) => `
+      <div class="bk-row">
+        <span class="bk-name" style="cursor:default">${b}</span>
+        <div class="bk-track"><div class="bk-fill" style="width:${Math.round(n / maxD * 100)}%;background:var(${DIFF_COLOR[b]});color:var(${DIFF_COLOR[b]})"></div></div>
+        <span class="bk-count">${n}</span>
+      </div>`).join('') + (dc.untagged ? `<div class="hit-caption">${dc.untagged} solve${dc.untagged === 1 ? '' : 's'} without a difficulty set</div>` : '')
+    : '<div style="font-family:var(--font-mono);font-size:var(--text-sm);color:var(--on-surface-muted)">Add difficulties to your solves (CF ratings, Easy/Medium/Hard…) to see this.</div>';
+
+  // Platform breakdown
+  const pc = platformCounts();
+  const maxP = pc.length ? pc[0][1] : 1;
+  document.getElementById('platformBreakdown').innerHTML = pc.length
+    ? pc.map(([p, n]) => `
+      <div class="bk-row">
+        <span class="bk-name" onclick="goToPlatform('${escAttr(p)}')" title="Show ${escAttr(p)} solves">${esc(p)}</span>
+        <div class="bk-track"><div class="bk-fill" style="width:${Math.round(n / maxP * 100)}%;background:var(${platformColorVar(p)});color:var(${platformColorVar(p)})"></div></div>
+        <span class="bk-count">${n}</span>
+      </div>`).join('')
+    : '<div style="font-family:var(--font-mono);font-size:var(--text-sm);color:var(--on-surface-muted)">Log your first solve to see this.</div>';
+
+  // Tag breakdown (top 10)
+  const tc = tagCounts().slice(0, 10);
+  const maxT = tc.length ? tc[0][1] : 1;
+  document.getElementById('tagBreakdown').innerHTML = tc.length
+    ? tc.map(([t, n]) => `
+      <div class="bk-row">
+        <span class="bk-name" onclick="goToTag('${escAttr(t)}')" title="Show ${escAttr(t)} solves">${esc(t)}</span>
+        <div class="bk-track"><div class="bk-fill" style="width:${Math.round(n / maxT * 100)}%;background:var(--accent-purple);color:var(--accent-purple)"></div></div>
+        <span class="bk-count">${n}</span>
+      </div>`).join('')
+    : '<div style="font-family:var(--font-mono);font-size:var(--text-sm);color:var(--on-surface-muted)">Add topic tags to your solves to see this.</div>';
+
+  // Recent
+  const recent = [...state.entries].sort((a, b) => b.date.localeCompare(a.date) || (b.ts || 0) - (a.ts || 0)).slice(0, 6);
+  document.getElementById('recentList').innerHTML = recent.length
+    ? recent.map(e => `
+      <div class="recent-row">
+        <span class="tag ${platformColorClass(e.platform)}" style="padding:2px 8px">${esc(e.platform)}</span>
+        <span class="recent-name">${e.url ? `<a href="${escAttr(e.url)}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none">${esc(e.name)}</a>` : esc(e.name)}</span>
+        <span class="recent-time">${relDay(e.date)}</span>
+      </div>`).join('')
+    : '<div style="font-family:var(--font-mono);font-size:var(--text-sm);color:var(--on-surface-muted)">No solves yet — head to the Log tab and add your first one.</div>';
+}
+
+function renderHeatmap() {
+  const days = countsByDate();
+  const today = dateFromStr(todayStr());
+  const NUM_WEEKS = 53;
+  // Start from the Sunday NUM_WEEKS ago
+  const start = new Date(today);
+  start.setDate(start.getDate() - (NUM_WEEKS - 1) * 7 - today.getDay());
+
+  let cells = '';
+  let months = '';
+  let lastMonth = -1;
+  const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+  for (let w = 0; w < NUM_WEEKS; w++) {
+    const weekStart = new Date(start);
+    weekStart.setDate(start.getDate() + w * 7);
+    // Month label if this week starts a new month
+    if (weekStart.getMonth() !== lastMonth) {
+      lastMonth = weekStart.getMonth();
+      months += `<span style="width:14px;overflow:visible;white-space:nowrap;display:inline-block">${monthNames[lastMonth]}</span>`;
+    } else {
+      months += '<span style="width:14px;display:inline-block"></span>';
+    }
+    for (let d = 0; d < 7; d++) {
+      const cur = new Date(weekStart);
+      cur.setDate(weekStart.getDate() + d);
+      if (cur > today) { cells += '<div class="hm-cell empty"></div>'; continue; }
+      const key = cur.getFullYear() + '-' + String(cur.getMonth() + 1).padStart(2, '0') + '-' + String(cur.getDate()).padStart(2, '0');
+      const n = days[key] || 0;
+      const lvl = n === 0 ? '' : n === 1 ? 'l1' : n === 2 ? 'l2' : n <= 4 ? 'l3' : 'l4';
+      cells += `<div class="hm-cell ${lvl}" title="${key}: ${n} solve${n === 1 ? '' : 's'}"></div>`;
+    }
+  }
+  document.getElementById('heatmap').innerHTML = cells;
+  document.getElementById('heatmapMonths').innerHTML = months;
+}
+
+function renderTrend() {
+  const buckets = weekBuckets(12);
+  const max = Math.max(1, ...buckets);
+  let html = '';
+  for (let i = 11; i >= 0; i--) {
+    const n = buckets[i];
+    const h = n === 0 ? 3 : Math.max(6, Math.round(n / max * 100));
+    const label = i === 0 ? 'now' : '-' + i + 'w';
+    html += `
+      <div class="trend-col" title="${i === 0 ? 'Last 7 days' : 'Week ' + i + ' back'}: ${n} solve${n === 1 ? '' : 's'}">
+        <span class="trend-val">${n || ''}</span>
+        <div class="trend-bar-track"><div class="trend-bar ${n === 0 ? 'zero' : ''} ${n >= state.weeklyGoal ? 'goal-hit' : ''}" style="height:${h}%"></div></div>
+        <span class="trend-label">${label}</span>
+      </div>`;
+  }
+  document.getElementById('trendChart').innerHTML = html;
+}
+
+function goToTag(t) {
+  activeTag = t;
+  switchView('solves');
+  renderFilters();
+  renderLog();
+}
+
+// ── Render: recent adds (log view) ──────────────
+function renderRecentAdds() {
+  const recent = [...state.entries]
+    .sort((a, b) => (b.ts || 0) - (a.ts || 0))
+    .slice(0, 8);
+  const el = document.getElementById('recentAdds');
+  if (!recent.length) {
+    el.innerHTML = '<div style="font-family:var(--font-mono);font-size:var(--text-sm);color:var(--on-surface-muted)">No solves yet — add your first one above.</div>';
+    return;
+  }
+  el.innerHTML = recent.map(e => `
+    <div class="recent-row">
+      <span class="tag ${platformColorClass(e.platform)}" style="padding:2px 8px">${esc(e.platform)}</span>
+      <span class="recent-name">${e.url ? `<a href="${escAttr(e.url)}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none">${esc(e.name)}</a>` : esc(e.name)}</span>
+      ${e.difficulty ? `<span class="entry-diff">${esc(e.difficulty)}</span>` : ''}
+      <span class="recent-time">${relDay(e.date)}</span>
+    </div>`).join('');
+}
+
+// ── Render: filters ──────────────────────────────
+function renderFilters() {
+  const pc = platformCounts();
+  const bar = document.getElementById('platformFilterBar');
+  let html = '<span class="filter-bar-label">Platform</span>';
+  html += `<button class="filter-chip ${activePlatform === 'all' ? 'active' : ''}" onclick="setPlatformFilter('all', this)">All (${state.entries.length})</button>`;
+  for (const [p, n] of pc) {
+    html += `<button class="filter-chip ${activePlatform === p ? 'active' : ''}" onclick="setPlatformFilter('${escAttr(p)}', this)">${esc(p)} (${n})</button>`;
+  }
+  bar.innerHTML = html;
+
+  const tagBar = document.getElementById('tagFilterBar');
+  if (activeTag) {
+    tagBar.style.display = 'flex';
+    document.getElementById('activeTagChipHolder').innerHTML =
+      `<button class="filter-chip active" onclick="clearTagFilter()" title="Click to clear">#${esc(activeTag)} ✕</button>`;
+  } else {
+    tagBar.style.display = 'none';
+  }
+}
+
+function setPlatformFilter(p, el) {
+  activePlatform = p;
+  renderFilters();
+  renderLog();
+  renderSidebar();
+}
+function setDateFilter(r, el) {
+  activeDateRange = r;
+  document.querySelectorAll('#dateFilterBar .filter-chip').forEach(c => c.classList.toggle('active', c.dataset.range === r));
+  renderLog();
+}
+function setShowFilter(mode, el) {
+  showMode = mode;
+  document.querySelectorAll('#dateFilterBar .filter-chip[data-show]').forEach(c =>
+    c.classList.toggle('active', c.dataset.show === mode));
+  renderLog();
+}
+function clearTagFilter() { activeTag = null; renderFilters(); renderLog(); }
+function setSearch(v) { searchQuery = v.trim().toLowerCase(); renderLog(); }
+function setSortOrder(order, el) {
+  sortOrder = order;
+  document.querySelectorAll('#sortBar .filter-chip').forEach(c => c.classList.toggle('active', c.dataset.sort === order));
+  renderLog();
+}
+
+// ── Render: log ──────────────────────────────────
+function filteredEntries() {
+  const filtered = state.entries.filter(e => {
+    if (activePlatform !== 'all' && e.platform !== activePlatform) return false;
+    if (activeDateRange !== 'all' && daysAgo(e.date) >= parseInt(activeDateRange, 10)) return false;
+    if (activeTag && !(e.tags || []).includes(activeTag)) return false;
+    if (showMode === 'revisit' && !e.revisit) return false;
+    if (showMode === 'contest' && !e.contest) return false;
+    if (showMode === 'starred' && !e.starred) return false;
+    if (showMode === 'plain' && (e.starred || e.revisit || e.contest)) return false;
+    if (searchQuery) {
+      const hay = [e.name, e.platform, e.difficulty || '', e.note || '', ...(e.tags || [])].join(' ').toLowerCase();
+      if (!hay.includes(searchQuery)) return false;
+    }
+    return true;
+  });
+  switch (sortOrder) {
+    case 'difficulty':
+      return filtered.sort((a, b) => {
+        const da = diffSortVal(a.difficulty), db = diffSortVal(b.difficulty);
+        return da - db || b.date.localeCompare(a.date);
+      });
+    case 'platform':
+      return filtered.sort((a, b) => a.platform.localeCompare(b.platform) || b.date.localeCompare(a.date));
+    case 'time':
+      return filtered.sort((a, b) => (b.mins || 0) - (a.mins || 0) || b.date.localeCompare(a.date));
+    default: // 'date'
+      return filtered.sort((a, b) => b.date.localeCompare(a.date) || (b.ts || 0) - (a.ts || 0));
+  }
+}
+
+function toggleRevisit(id) {
+  const e = state.entries.find(x => x.id === id);
+  if (!e) return;
+  e.revisit = !e.revisit;
+  save();
+  renderLog();
+  showToast(e.revisit ? 'Marked for revisit: ' + e.name : 'Revisit cleared');
+}
+
+function toggleStar(id) {
+  const e = state.entries.find(x => x.id === id);
+  if (!e) return;
+  e.starred = !e.starred;
+  save();
+  renderLog();
+  renderRecentAdds();
+  renderOverview();
+  showToast(e.starred ? '★ Starred: ' + e.name : 'Star removed');
+}
+
+function renderPlatformStats() {
+  const el = document.getElementById('platformStats');
+  if (activePlatform === 'all') { el.style.display = 'none'; return; }
+  el.style.display = 'block';
+  const pEntries = state.entries.filter(e => e.platform === activePlatform);
+  const total = pEntries.length;
+  const thisWeek = pEntries.filter(e => daysAgo(e.date) < 7 && daysAgo(e.date) >= 0).length;
+  const thisMonth = pEntries.filter(e => daysAgo(e.date) < 30 && daysAgo(e.date) >= 0).length;
+  const tags = {};
+  for (const e of pEntries) for (const t of (e.tags || [])) tags[t] = (tags[t] || 0) + 1;
+  const topTags = Object.entries(tags).sort((a, b) => b[1] - a[1]).slice(0, 8);
+  const dc = {};
+  for (const e of pEntries) { const b = diffBucket(e.difficulty); if (b) dc[b] = (dc[b] || 0) + 1; }
+  const diffRows = DIFF_ORDER.filter(b => dc[b]).map(b => [b, dc[b]]);
+  const maxD = diffRows.length ? Math.max(...diffRows.map(r => r[1])) : 1;
+  const maxT = topTags.length ? topTags[0][1] : 1;
+  const starred = pEntries.filter(e => e.starred).length;
+  const revisit = pEntries.filter(e => e.revisit).length;
+
+  el.innerHTML = `
+    <div class="stats-grid" style="margin-bottom:20px">
+      <div class="stat-card">
+        <div class="stat-card-label">Total</div>
+        <div class="stat-card-value" style="color:var(${platformColorVar(activePlatform)})">${total}</div>
+        <div class="stat-card-sub">${starred ? starred + ' starred · ' : ''}${revisit ? revisit + ' to revisit' : 'on ' + esc(activePlatform)}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-label">This Week</div>
+        <div class="stat-card-value">${thisWeek}</div>
+        <div class="stat-card-sub">last 7 days</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-label">This Month</div>
+        <div class="stat-card-value">${thisMonth}</div>
+        <div class="stat-card-sub">last 30 days</div>
+      </div>
+    </div>
+    ${diffRows.length ? `<div class="panel" style="margin-bottom:20px"><div class="panel-title">Difficulty</div>${diffRows.map(([b, n]) => `
+      <div class="bk-row">
+        <span class="bk-name" style="cursor:default">${b}</span>
+        <div class="bk-track"><div class="bk-fill" style="width:${Math.round(n / maxD * 100)}%;background:var(${DIFF_COLOR[b]});color:var(${DIFF_COLOR[b]})"></div></div>
+        <span class="bk-count">${n}</span>
+      </div>`).join('')}</div>` : ''}
+    ${topTags.length ? `<div class="panel" style="margin-bottom:20px"><div class="panel-title">Topics</div>${topTags.map(([t, n]) => `
+      <div class="bk-row">
+        <span class="bk-name" onclick="goToTag('${escAttr(t)}')">${esc(t)}</span>
+        <div class="bk-track"><div class="bk-fill" style="width:${Math.round(n / maxT * 100)}%;background:var(--accent-purple);color:var(--accent-purple)"></div></div>
+        <span class="bk-count">${n}</span>
+      </div>`).join('')}</div>` : ''}`;
+}
+
+function renderLog() {
+  renderPlatformStats();
+  document.getElementById('logHeaderCount').textContent = state.entries.length + ' solved';
+  const nRev = state.entries.filter(e => e.revisit).length;
+  document.getElementById('revisitCount').textContent = nRev ? '(' + nRev + ')' : '';
+  const nCon = state.entries.filter(e => e.contest).length;
+  document.getElementById('contestCount').textContent = nCon ? '(' + nCon + ')' : '';
+  const nStar = state.entries.filter(e => e.starred).length;
+  document.getElementById('starredCount').textContent = nStar ? '(' + nStar + ')' : '';
+  const list = document.getElementById('logList');
+  const entries = filteredEntries();
+  document.getElementById('resultCount').textContent =
+    entries.length === state.entries.length ? '' : entries.length + ' of ' + state.entries.length;
+
+  if (!state.entries.length) {
+    list.innerHTML = `<div class="empty-state"><strong>No solves logged yet</strong>Add your first one with the form above — it takes 5 seconds.</div>`;
+    return;
+  }
+  if (!entries.length) {
+    list.innerHTML = `<div class="empty-state"><strong>No matches</strong>Try clearing filters or the search box.</div>`;
+    return;
+  }
+
+  let html = '';
+  let lastDate = null;
+  for (const e of entries) {
+    if (e.date !== lastDate) {
+      lastDate = e.date;
+      const n = entries.filter(x => x.date === e.date).length;
+      html += `<div class="day-group-label"><span>${relDay(e.date)}</span>${fmtDate(e.date)} · ${n} solve${n === 1 ? '' : 's'}</div>`;
+    }
+    const nameHtml = e.url
+      ? `<a class="entry-name" href="${escAttr(e.url)}" target="_blank" rel="noopener">${esc(e.name)}</a>`
+      : `<span class="entry-name">${esc(e.name)}</span>`;
+    html += `
+      <div class="entry-card ${e.revisit ? 'revisit' : ''}">
+        <div class="entry-top">
+          <span class="tag ${platformColorClass(e.platform)}" style="padding:3px 10px">${esc(e.platform)}</span>
+          ${nameHtml}
+          ${e.difficulty ? `<span class="entry-diff">${esc(e.difficulty)}</span>` : ''}
+          ${e.revisit ? '<span class="revisit-tag">↺ revisit</span>' : ''}
+          ${e.contest ? '<span class="revisit-tag" style="color:var(--accent-purple);background:rgba(167,139,250,0.08);border-color:rgba(167,139,250,0.2)">🏆 contest</span>' : ''}
+          ${e.starred ? '<span class="entry-star">★ starred</span>' : ''}
+          ${e.confidence ? `<span class="entry-meta-tag conf-${e.confidence}">${e.confidence === 3 ? '◆◆◆' : e.confidence === 2 ? '◆◆' : '◆'}</span>` : ''}
+          ${e.method === 'hint' ? '<span class="entry-meta-tag method-hint">hint</span>' : e.method === 'editorial' ? '<span class="entry-meta-tag method-editorial">editorial</span>' : ''}
+          ${e.attempt > 1 ? `<span class="entry-mins">attempt #${e.attempt}</span>` : ''}
+          ${e.mins > 0 ? `<span class="entry-mins">⏱ ${e.mins}m</span>` : ''}
+          <span class="entry-date">${fmtDate(e.date)}</span>
+          <span class="entry-actions">
+            <button class="btn-icon star-btn ${e.starred ? 'active' : ''}" onclick="toggleStar('${e.id}')" title="${e.starred ? 'Unstar' : 'Star'}">★</button>
+            <button class="btn-icon" onclick="toggleRevisit('${e.id}')" title="${e.revisit ? 'Unmark revisit' : 'Mark for revisit'}" style="${e.revisit ? 'color:var(--accent-amber)' : ''}">↺</button>
+            <button class="btn-icon" onclick="startEdit('${e.id}')" title="Edit"><svg><use href="#icon-edit"/></svg></button>
+            <button class="btn-icon danger" onclick="deleteEntry('${e.id}')" title="Delete"><svg><use href="#icon-trash"/></svg></button>
+          </span>
+        </div>
+        ${(e.tags && e.tags.length) ? `<div class="entry-tags">${e.tags.map(t => `<span class="entry-tag" onclick="goToTag('${escAttr(t)}')">#${esc(t)}</span>`).join('')}</div>` : ''}
+        ${e.note ? `<div class="entry-note">${esc(e.note)}</div>` : ''}
+      </div>`;
+  }
+  list.innerHTML = html;
+}
+
+// ── Suggestions (datalists) ──────────────────────
+const DEFAULT_PLATFORMS = ['Codeforces', 'LeetCode', 'AtCoder', 'CSES', 'CodeChef', 'GeeksforGeeks', 'HackerRank', 'USACO', 'Project Euler', 'InterviewBit'];
+function renderSuggestions() {
+  const used = platformCounts().map(([p]) => p);
+  const usedLower = used.map(p => p.toLowerCase());
+  const all = [...used, ...DEFAULT_PLATFORMS.filter(p => !usedLower.includes(p.toLowerCase()))];
+  document.getElementById('platformSuggest').innerHTML = all.map(p => `<option value="${escAttr(p)}">`).join('');
+  document.getElementById('tagSuggest').innerHTML = tagCounts().map(([t]) => `<option value="${escAttr(t)}">`).join('');
+}
+
+// ── Add / Edit / Delete ──────────────────────────
+let editingId = null;
+
+function readForm() {
+  return {
+    name: document.getElementById('qaName').value.trim(),
+    platform: document.getElementById('qaPlatform').value.trim(),
+    difficulty: document.getElementById('qaDifficulty').value.trim(),
+    date: document.getElementById('qaDate').value || todayStr(),
+    tags: document.getElementById('qaTags').value.split(',').map(t => t.trim().toLowerCase()).filter(Boolean),
+    url: document.getElementById('qaUrl').value.trim(),
+    note: document.getElementById('qaNote').value.trim(),
+    mins: Math.max(0, parseInt(document.getElementById('qaMins').value, 10) || 0),
+    confidence: parseInt(document.getElementById('qaConfidence').value, 10) || 0,
+    method: document.getElementById('qaMethod').value || '',
+    attempt: Math.max(0, parseInt(document.getElementById('qaAttempt').value, 10) || 0),
+    starred: document.getElementById('qaStar').checked,
+    revisit: document.getElementById('qaRevisit').checked,
+    contest: document.getElementById('qaContest').checked,
+  };
+}
+
+function clearForm() {
+  ['qaName', 'qaPlatform', 'qaDifficulty', 'qaTags', 'qaUrl', 'qaNote', 'qaMins', 'qaAttempt'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('qaConfidence').value = '';
+  document.getElementById('qaMethod').value = '';
+  document.getElementById('qaStar').checked = false;
+  document.getElementById('qaRevisit').checked = false;
+  document.getElementById('qaContest').checked = false;
+  document.getElementById('qaDate').value = todayStr();
+}
+
+function submitEntry() {
+  const f = readForm();
+  if (!f.name) { showToast('Question name is required'); document.getElementById('qaName').focus(); return; }
+  if (!f.platform) { showToast('Platform is required'); document.getElementById('qaPlatform').focus(); return; }
+  f.platform = canonicalPlatform(f.platform);
+  if (f.url && !/^https?:\/\//i.test(f.url)) f.url = 'https://' + f.url;
+
+  if (editingId) {
+    const e = state.entries.find(x => x.id === editingId);
+    if (e) Object.assign(e, f);
+    showToast('Solve updated');
+    cancelEdit(true);
+    save();
+    renderAll();
+    switchView('solves');
+    return;
+  } else {
+    state.entries.push({ id: uid(), ts: Date.now(), ...f });
+    showToast('Solve logged: ' + f.name);
+    clearForm();
+    document.getElementById('qaName').focus();
+  }
+  save();
+  renderAll();
+}
+
+function qaEnter(e) { if (e.key === 'Enter') { e.preventDefault(); submitEntry(); } }
+
+function startEdit(id) {
+  const e = state.entries.find(x => x.id === id);
+  if (!e) return;
+  editingId = id;
+  document.getElementById('qaName').value = e.name;
+  document.getElementById('qaPlatform').value = e.platform;
+  document.getElementById('qaDifficulty').value = e.difficulty || '';
+  document.getElementById('qaDate').value = e.date;
+  document.getElementById('qaTags').value = (e.tags || []).join(', ');
+  document.getElementById('qaUrl').value = e.url || '';
+  document.getElementById('qaNote').value = e.note || '';
+  document.getElementById('qaMins').value = e.mins > 0 ? e.mins : '';
+  document.getElementById('qaConfidence').value = e.confidence || '';
+  document.getElementById('qaMethod').value = e.method || '';
+  document.getElementById('qaAttempt').value = e.attempt > 0 ? e.attempt : '';
+  document.getElementById('qaStar').checked = !!e.starred;
+  document.getElementById('qaRevisit').checked = !!e.revisit;
+  document.getElementById('qaContest').checked = !!e.contest;
+  document.getElementById('qaTitle').textContent = 'Edit solve';
+  document.getElementById('qaSubmit').textContent = 'Save changes';
+  document.getElementById('qaCancel').style.display = '';
+  document.getElementById('qaPanel').classList.add('editing');
+  switchView('log');
+  document.getElementById('qaPanel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  document.getElementById('qaName').focus();
+}
+
+function cancelEdit(silent) {
+  editingId = null;
+  clearForm();
+  document.getElementById('qaTitle').innerHTML = 'Log a solve <span style="text-transform:none;letter-spacing:0;font-weight:400">— press <b>n</b> anywhere to jump here</span>';
+  document.getElementById('qaSubmit').textContent = '+ Add solve';
+  document.getElementById('qaCancel').style.display = 'none';
+  document.getElementById('qaPanel').classList.remove('editing');
+}
+
+function deleteEntry(id) {
+  const e = state.entries.find(x => x.id === id);
+  if (!e) return;
+  if (!confirm('Delete "' + e.name + '" (' + e.platform + ')?')) return;
+  state.entries = state.entries.filter(x => x.id !== id);
+  if (editingId === id) cancelEdit(true);
+  // If the deleted entry was the last on its platform, reset the filter
+  if (activePlatform !== 'all' && !state.entries.some(x => x.platform === activePlatform)) activePlatform = 'all';
+  save();
+  renderAll();
+  showToast('Deleted');
+}
+
+// ── Export / Import ──────────────────────────────
+function exportData() {
+  document.getElementById('exportFilename').value = 'solve-log-' + todayStr() + '.json';
+  document.getElementById('exportOverlay').classList.add('open');
+}
+function closeExportModal() { document.getElementById('exportOverlay').classList.remove('open'); }
+function handleOverlayClick(ev) { if (ev.target === ev.currentTarget) closeExportModal(); }
+function confirmExport() {
+  let name = document.getElementById('exportFilename').value.trim() || 'solve-log.json';
+  if (!name.endsWith('.json')) name += '.json';
+  const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  closeExportModal();
+  showToast('Exported ' + state.entries.length + ' solves');
+}
+function importData(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const data = JSON.parse(reader.result);
+      if (!data || !Array.isArray(data.entries)) throw new Error('bad format');
+      const valid = data.entries.filter(e => e && e.name && e.platform && e.date);
+      if (!confirm('Import ' + valid.length + ' solves? This replaces your current log (' + state.entries.length + ' solves).')) { input.value = ''; return; }
+      state.entries = valid.map(e => ({
+        id: e.id || uid(),
+        ts: e.ts || Date.now(),
+        name: String(e.name),
+        platform: String(e.platform),
+        difficulty: e.difficulty ? String(e.difficulty) : '',
+        date: String(e.date),
+        tags: Array.isArray(e.tags) ? e.tags.map(String) : [],
+        url: e.url ? String(e.url) : '',
+        note: e.note ? String(e.note) : '',
+        mins: Math.max(0, parseInt(e.mins, 10) || 0),
+        confidence: parseInt(e.confidence, 10) || 0,
+        method: e.method ? String(e.method) : '',
+        attempt: Math.max(0, parseInt(e.attempt, 10) || 0),
+        starred: !!e.starred,
+        revisit: !!e.revisit,
+        contest: !!e.contest,
+      }));
+      if (typeof data.weeklyGoal === 'number' && data.weeklyGoal > 0) state.weeklyGoal = data.weeklyGoal;
+      if (typeof data.dailyGoal === 'number' && data.dailyGoal > 0) state.dailyGoal = data.dailyGoal;
+      activePlatform = 'all'; activeTag = null;
+      save();
+      renderAll();
+      showToast('Imported ' + state.entries.length + ' solves');
+    } catch (err) {
+      showToast('Import failed: not a valid solve-log file');
+    }
+    input.value = '';
+  };
+  reader.readAsText(file);
+}
+
+let csvPlatformChoice = 'all';
+
+function exportCSV() {
+  csvPlatformChoice = 'all';
+  const platforms = [...new Set(state.entries.map(e => canonicalPlatform(e.platform)))].sort();
+  const container = document.getElementById('csvPlatformChips');
+  let html = '<button class="csv-chip active" onclick="setCsvPlatform(\'all\',this)">All</button>';
+  for (const p of platforms) {
+    html += '<button class="csv-chip" onclick="setCsvPlatform(\'' + escAttr(p) + '\',this)">' + esc(p) + '</button>';
+  }
+  container.innerHTML = html;
+  document.getElementById('csvOverlay').classList.add('open');
+}
+
+function closeCsvModal() { document.getElementById('csvOverlay').classList.remove('open'); }
+
+function setCsvPlatform(val, btn) {
+  csvPlatformChoice = val;
+  document.querySelectorAll('#csvPlatformChips .csv-chip').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function confirmCSVExport() {
+  const cols = ['name', 'platform', 'difficulty', 'date', 'tags', 'url', 'note', 'mins', 'confidence', 'method', 'attempt', 'revisit', 'contest'];
+  const q = v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
+  const rows = [cols.join(',')];
+  let entries = [...state.entries];
+  if (csvPlatformChoice !== 'all') {
+    entries = entries.filter(e => canonicalPlatform(e.platform) === csvPlatformChoice);
+  }
+  const sorted = entries.sort((a, b) => a.date.localeCompare(b.date) || (a.ts || 0) - (b.ts || 0));
+  for (const e of sorted) {
+    rows.push([
+      q(e.name), q(e.platform), q(e.difficulty || ''), q(e.date),
+      q((e.tags || []).join('; ')), q(e.url || ''), q(e.note || ''),
+      e.mins > 0 ? e.mins : '', e.confidence || '', e.method || '', e.attempt > 1 ? e.attempt : '',
+      e.revisit ? 'yes' : '', e.contest ? 'yes' : '',
+    ].join(','));
+  }
+  const blob = new Blob(['\ufeff' + rows.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+  const a = document.createElement('a');
+  const suffix = csvPlatformChoice === 'all' ? '' : '-' + csvPlatformChoice.toLowerCase().replace(/\s+/g, '-');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'solve-log' + suffix + '-' + todayStr() + '.csv';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  closeCsvModal();
+  showToast('Exported ' + sorted.length + ' solves as CSV' + (csvPlatformChoice !== 'all' ? ' (' + csvPlatformChoice + ')' : ''));
+}
+
+// ── Codeforces Import ────────────────────────────
+function openCFImport() {
+  document.getElementById('cfHandle').value = '';
+  document.getElementById('cfStatus').textContent = '';
+  document.getElementById('cfImportBtn').disabled = false;
+  document.getElementById('cfOverlay').classList.add('open');
+  setTimeout(() => document.getElementById('cfHandle').focus(), 220);
+}
+
+function closeCFModal() {
+  document.getElementById('cfOverlay').classList.remove('open');
+}
+
+async function fetchCF() {
+  const handle = document.getElementById('cfHandle').value.trim();
+  if (!handle) { document.getElementById('cfStatus').textContent = 'Please enter a handle.'; return; }
+
+  const statusEl = document.getElementById('cfStatus');
+  const btn = document.getElementById('cfImportBtn');
+  statusEl.textContent = 'Fetching submissions...';
+  statusEl.style.color = 'var(--primary)';
+  btn.disabled = true;
+
+  try {
+    const resp = await fetch('https://codeforces.com/api/user.status?handle=' + encodeURIComponent(handle));
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const data = await resp.json();
+    if (data.status !== 'OK') throw new Error(data.comment || 'API error');
+
+    // Filter accepted, dedupe by problem (contestId + index)
+    const seen = new Set();
+    const accepted = [];
+    for (const sub of data.result) {
+      if (sub.verdict !== 'OK') continue;
+      const key = (sub.problem.contestId || '') + '-' + sub.problem.index;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      accepted.push(sub);
+    }
+
+    statusEl.textContent = 'Found ' + accepted.length + ' accepted problems.';
+
+    // Dedupe against existing entries (by name + platform = Codeforces)
+    const existingNames = new Set(
+      state.entries
+        .filter(e => e.platform.toLowerCase() === 'codeforces')
+        .map(e => e.name.toLowerCase())
+    );
+
+    let added = 0;
+    for (const sub of accepted) {
+      const name = (sub.problem.contestId ? sub.problem.contestId + sub.problem.index + ' — ' : '') + sub.problem.name;
+      if (existingNames.has(name.toLowerCase())) continue;
+
+      const date = new Date(sub.creationTimeSeconds * 1000);
+      const dateStr = date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0') + '-' + String(date.getDate()).padStart(2, '0');
+
+      const tags = (sub.problem.tags || []).slice();
+      const rating = sub.problem.rating;
+      const url = sub.problem.contestId
+        ? 'https://codeforces.com/contest/' + sub.problem.contestId + '/problem/' + sub.problem.index
+        : '';
+
+      state.entries.push({
+        id: uid(),
+        ts: sub.creationTimeSeconds * 1000,
+        name: name,
+        platform: 'Codeforces',
+        difficulty: rating ? String(rating) : '',
+        date: dateStr,
+        tags: tags,
+        url: url,
+        note: '',
+        mins: 0,
+        confidence: 0,
+        method: '',
+        attempt: 0,
+        starred: false,
+        revisit: false,
+        contest: sub.author && sub.author.participantType === 'CONTESTANT',
+      });
+      added++;
+    }
+
+    save();
+    renderAll();
+    closeCFModal();
+    showToast('Imported ' + added + ' new problems from Codeforces' + (accepted.length - added > 0 ? ' (' + (accepted.length - added) + ' duplicates skipped)' : ''));
+
+  } catch (err) {
+    statusEl.textContent = 'Error: ' + (err.message || 'Failed to fetch');
+    statusEl.style.color = 'var(--accent-red)';
+    btn.disabled = false;
+  }
+}
+
+// ── Analytics ─────────────────────────────────────
+function renderAnalytics() {
+  const entries = state.entries;
+  if (!entries.length) {
+    document.getElementById('analyticsStats').innerHTML = '<div class="analytics-empty">No data yet — log some solves first.</div>';
+    ['analyticsTimeDiff','analyticsTimePlat','analyticsDiffProg','analyticsWeakTopics','analyticsConfidence','analyticsMethod'].forEach(id => document.getElementById(id).innerHTML = '');
+    return;
+  }
+
+  // ── Top stat cards ──
+  const timed = entries.filter(e => e.mins > 0);
+  const avgTime = timed.length ? Math.round(timed.reduce((s, e) => s + e.mins, 0) / timed.length) : 0;
+  const withConf = entries.filter(e => e.confidence > 0);
+  const avgConf = withConf.length ? (withConf.reduce((s, e) => s + e.confidence, 0) / withConf.length).toFixed(1) : '—';
+  const soloCount = entries.filter(e => !e.method || e.method === 'solo').length;
+  const soloPct = entries.length ? Math.round(soloCount / entries.length * 100) : 0;
+  const uniquePlats = new Set(entries.map(e => e.platform.toLowerCase())).size;
+
+  document.getElementById('analyticsStats').innerHTML =
+    `<div class="stat-card"><div class="stat-label">Avg Time</div><div class="stat-value">${avgTime}<small style="font-size:12px;color:var(--on-surface-secondary)"> min</small></div></div>` +
+    `<div class="stat-card"><div class="stat-label">Avg Confidence</div><div class="stat-value">${avgConf}<small style="font-size:12px;color:var(--on-surface-secondary)"> /3</small></div></div>` +
+    `<div class="stat-card"><div class="stat-label">Solo Rate</div><div class="stat-value">${soloPct}%</div></div>` +
+    `<div class="stat-card"><div class="stat-label">Platforms</div><div class="stat-value">${uniquePlats}</div></div>`;
+
+  // ── Avg time by difficulty ──
+  const diffTime = {};
+  const diffTimeCount = {};
+  for (const e of timed) {
+    const b = diffBucket(e.difficulty);
+    if (!b) continue;
+    diffTime[b] = (diffTime[b] || 0) + e.mins;
+    diffTimeCount[b] = (diffTimeCount[b] || 0) + 1;
+  }
+  const diffTimeEntries = DIFF_ORDER.filter(b => diffTimeCount[b]).map(b => [b, Math.round(diffTime[b] / diffTimeCount[b])]);
+  const maxDiffTime = Math.max(...diffTimeEntries.map(r => r[1]), 1);
+  document.getElementById('analyticsTimeDiff').innerHTML = diffTimeEntries.length
+    ? diffTimeEntries.map(([label, avg]) => {
+      const displayLabel = label === '&lt; 1200' ? '< 1200' : label;
+      return `<div class="analytics-bar-row"><div class="analytics-bar-label">${displayLabel}</div><div class="analytics-bar-track"><div class="analytics-bar-fill" style="width:${avg/maxDiffTime*100}%;background:var(${DIFF_COLOR[label] || '--accent-slate'})"></div></div><div class="analytics-bar-val">${avg}m</div></div>`;
+    }).join('')
+    : '<div class="analytics-empty">No timed solves with difficulty</div>';
+
+  // ── Avg time by platform ──
+  const platTime = {};
+  const platTimeCount = {};
+  for (const e of timed) {
+    platTime[e.platform] = (platTime[e.platform] || 0) + e.mins;
+    platTimeCount[e.platform] = (platTimeCount[e.platform] || 0) + 1;
+  }
+  const platTimeEntries = Object.keys(platTimeCount).map(p => [p, Math.round(platTime[p] / platTimeCount[p])]).sort((a, b) => b[1] - a[1]);
+  const maxPlatTime = Math.max(...platTimeEntries.map(r => r[1]), 1);
+  document.getElementById('analyticsTimePlat').innerHTML = platTimeEntries.length
+    ? platTimeEntries.map(([p, avg]) =>
+      `<div class="analytics-bar-row"><div class="analytics-bar-label">${esc(p)}</div><div class="analytics-bar-track"><div class="analytics-bar-fill" style="width:${avg/maxPlatTime*100}%;background:var(${platformColorVar(p)})"></div></div><div class="analytics-bar-val">${avg}m</div></div>`
+    ).join('')
+    : '<div class="analytics-empty">No timed solves</div>';
+
+  // ── Difficulty progression (last 8 weeks) ──
+  const weekData = [];
+  for (let w = 7; w >= 0; w--) {
+    const weekEntries = entries.filter(e => { const d = daysAgo(e.date); return d >= w * 7 && d < (w + 1) * 7; });
+    const buckets = {};
+    for (const e of weekEntries) {
+      const b = diffBucket(e.difficulty);
+      if (b) buckets[b] = (buckets[b] || 0) + 1;
+    }
+    const weekStart = new Date(); weekStart.setDate(weekStart.getDate() - w * 7 - 6);
+    const label = (weekStart.getMonth() + 1) + '/' + weekStart.getDate();
+    weekData.push({ label, buckets, total: weekEntries.length });
+  }
+  const maxWeekTotal = Math.max(...weekData.map(w => w.total), 1);
+  const activeDiffs = DIFF_ORDER.filter(b => weekData.some(w => w.buckets[b]));
+
+  if (activeDiffs.length && weekData.some(w => w.total > 0)) {
+    const CH = 120; // chart height in px
+    let html = '<div style="display:grid;grid-template-columns:repeat(8,1fr);gap:6px">';
+    for (const w of weekData) {
+      let col = '<div>';
+      col += '<div style="display:flex;flex-direction:column;gap:2px;justify-content:flex-end;height:' + CH + 'px">';
+      if (w.total > 0) {
+        for (const b of activeDiffs) {
+          const n = w.buckets[b] || 0;
+          if (n > 0) {
+            const h = Math.max(4, Math.round((n / maxWeekTotal) * CH));
+            const tip = (b === '&lt; 1200' ? '< 1200' : b) + ': ' + n;
+            col += `<div style="height:${h}px;background:var(${DIFF_COLOR[b] || '--accent-slate'});border-radius:2px" title="${tip}"></div>`;
+          }
+        }
+      }
+      col += '</div>';
+      col += `<div class="analytics-week-label">${w.label}</div>`;
+      col += '</div>';
+      html += col;
+    }
+    html += '</div>';
+    html += '<div class="analytics-stacked-legend" style="margin-top:10px">';
+    for (const b of activeDiffs) {
+      const displayLabel = b === '&lt; 1200' ? '< 1200' : b;
+      html += `<div class="analytics-stacked-legend-item"><span class="analytics-stacked-legend-dot" style="background:var(${DIFF_COLOR[b] || '--accent-slate'})"></span>${displayLabel}</div>`;
+    }
+    html += '</div>';
+    document.getElementById('analyticsDiffProg').innerHTML = html;
+  } else {
+    document.getElementById('analyticsDiffProg').innerHTML = '<div class="analytics-empty">Not enough data</div>';
+  }
+
+  // ── Weakest topics (lowest avg confidence among topics with >= 2 rated solves) ──
+  const topicConf = {};
+  const topicCount = {};
+  for (const e of entries) {
+    if (!e.confidence) continue; // skip unrated
+    for (const t of (e.tags || [])) {
+      topicCount[t] = (topicCount[t] || 0) + 1;
+      topicConf[t] = (topicConf[t] || 0) + e.confidence;
+    }
+  }
+  const weakTopics = Object.keys(topicCount)
+    .filter(t => topicCount[t] >= 2)
+    .map(t => ({ tag: t, avg: topicConf[t] / topicCount[t], count: topicCount[t] }))
+    .sort((a, b) => a.avg - b.avg)
+    .slice(0, 8);
+
+  if (weakTopics.length) {
+    document.getElementById('analyticsWeakTopics').innerHTML = weakTopics.map(w => {
+      const color = w.avg < 1.5 ? '--accent-red' : w.avg < 2.5 ? '--accent-amber' : '--accent-green';
+      return `<div class="analytics-bar-row"><div class="analytics-bar-label">${esc(w.tag)}</div><div class="analytics-bar-track"><div class="analytics-bar-fill" style="width:${w.avg/3*100}%;background:var(${color})"></div></div><div class="analytics-bar-val">${w.avg.toFixed(1)} (${w.count})</div></div>`;
+    }).join('');
+  } else {
+    document.getElementById('analyticsWeakTopics').innerHTML = '<div class="analytics-empty">Tag 2+ problems with topics and confidence to see weak areas</div>';
+  }
+
+  // ── Confidence breakdown ──
+  const confCounts = [0, 0, 0, 0]; // index 0 = unset, 1-3 = confidence levels
+  for (const e of entries) confCounts[e.confidence || 0]++;
+  const confLabels = ['Unrated', 'Low (1)', 'Medium (2)', 'High (3)'];
+  const confColors = ['--accent-slate', '--accent-red', '--accent-amber', '--accent-green'];
+  const maxConf = Math.max(...confCounts, 1);
+  document.getElementById('analyticsConfidence').innerHTML = confCounts.map((n, i) =>
+    n > 0 ? `<div class="analytics-bar-row"><div class="analytics-bar-label">${confLabels[i]}</div><div class="analytics-bar-track"><div class="analytics-bar-fill" style="width:${n/maxConf*100}%;background:var(${confColors[i]})"></div></div><div class="analytics-bar-val">${n}</div></div>` : ''
+  ).join('');
+
+  // ── Method breakdown ──
+  const methCounts = { solo: 0, hint: 0, editorial: 0, unset: 0 };
+  for (const e of entries) {
+    if (!e.method || e.method === 'solo') methCounts.solo++;
+    else if (e.method === 'hint') methCounts.hint++;
+    else if (e.method === 'editorial') methCounts.editorial++;
+    else methCounts.unset++;
+  }
+  const total = entries.length;
+  const methData = [
+    ['Solo', methCounts.solo, '--accent-green'],
+    ['Hint', methCounts.hint, '--accent-sky'],
+    ['Editorial', methCounts.editorial, '--accent-rose'],
+  ].filter(r => r[1] > 0);
+
+  if (methData.length) {
+    let html = '<div class="analytics-stacked-row">';
+    for (const [label, count, color] of methData) {
+      html += `<div class="analytics-stacked-seg" style="width:${count/total*100}%;background:var(${color})" title="${label}: ${count} (${Math.round(count/total*100)}%)"></div>`;
+    }
+    html += '</div><div class="analytics-stacked-legend">';
+    for (const [label, count, color] of methData) {
+      html += `<div class="analytics-stacked-legend-item"><span class="analytics-stacked-legend-dot" style="background:var(${color})"></span>${label} ${count} (${Math.round(count/total*100)}%)</div>`;
+    }
+    html += '</div>';
+    document.getElementById('analyticsMethod').innerHTML = html;
+  } else {
+    document.getElementById('analyticsMethod').innerHTML = '<div class="analytics-empty">No data</div>';
+  }
+}
+
+// ── Keyboard shortcuts ───────────────────────────
+document.addEventListener('keydown', (e) => {
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  const t = e.target;
+  const typing = t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable);
+  if (typing) {
+    if (e.key === 'Escape') t.blur();
+    return;
+  }
+  if (e.key === 'n' || e.key === 'N') {
+    e.preventDefault();
+    switchView('log'); // switchView already focuses the name field
+  } else if (e.key === '/') {
+    e.preventDefault();
+    switchView('solves');
+  }
+});
+
+// ── Init ─────────────────────────────────────────
+document.getElementById('qaDate').value = todayStr();
+renderAll();
+</script>
+</body>
+</html>
