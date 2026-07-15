@@ -787,6 +787,139 @@
     white-space: nowrap;
   }
   .entry-card.revisit { border-left: 2px solid var(--accent-amber); }
+  .entry-card.bulk-selected { border-color: var(--primary); background: rgba(34,211,238,0.04); }
+
+  /* Bulk action bar */
+  .bulk-bar {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: var(--surface-low);
+    border: 1px solid rgba(34,211,238,0.2);
+    border-radius: var(--radius-md);
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+    box-shadow: 0 0 12px rgba(34,211,238,0.06), var(--shadow-sm);
+    animation: bulkSlideIn 250ms var(--ease-out);
+  }
+  @keyframes bulkSlideIn {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .bulk-bar.visible { display: flex; }
+  .bulk-bar-count {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--primary);
+    margin-right: auto;
+  }
+  .bulk-sep {
+    width: 1px;
+    height: 20px;
+    background: var(--border-default);
+    flex-shrink: 0;
+  }
+  .bulk-btn {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+    border: 1px solid transparent;
+    background: var(--surface-container);
+    color: var(--on-surface-secondary);
+    cursor: pointer;
+    transition: color 150ms var(--ease-out), background 150ms var(--ease-out), border-color 150ms var(--ease-out), transform 100ms var(--ease-out);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .bulk-btn:hover { color: var(--on-surface); background: var(--surface-container-high); border-color: var(--border-default); }
+    .bulk-btn.danger:hover { color: var(--accent-red); border-color: rgba(239,68,68,0.3); background: rgba(239,68,68,0.08); }
+  }
+  .bulk-btn:active { transform: scale(0.95); }
+  .bulk-btn-cancel {
+    color: var(--on-surface-muted);
+    background: transparent;
+    border: none;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    padding: 6px 8px;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .bulk-btn-cancel:hover { color: var(--on-surface-secondary); background: transparent; border-color: transparent; }
+  }
+
+  /* Checkbox in entry cards */
+  .entry-check {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 16px; height: 16px;
+    border: 1.5px solid var(--on-surface-muted);
+    border-radius: 4px;
+    background: transparent;
+    cursor: pointer;
+    flex-shrink: 0;
+    position: relative;
+    transition: background 150ms var(--ease-out), border-color 150ms var(--ease-out);
+  }
+  .entry-check:checked {
+    background: var(--primary);
+    border-color: var(--primary);
+  }
+  .entry-check:checked::after {
+    content: '';
+    position: absolute;
+    top: 2px; left: 5px;
+    width: 4px; height: 8px;
+    border: solid var(--surface-lowest);
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .entry-check:not(:checked):hover { border-color: var(--primary); }
+  }
+
+  /* Storage info modal */
+  .storage-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border-subtle);
+    font-size: var(--text-sm);
+  }
+  .storage-row:last-child { border-bottom: none; }
+  .storage-row-label { color: var(--on-surface-secondary); font-family: var(--font-mono); font-size: var(--text-xs); }
+  .storage-row-value { color: var(--on-surface); font-family: var(--font-mono); font-weight: 600; font-size: var(--text-sm); }
+  .storage-bar-track {
+    width: 100%; height: 8px;
+    background: var(--surface-lowest);
+    border-radius: 4px;
+    margin: 14px 0 6px;
+    overflow: hidden;
+  }
+  .storage-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 300ms var(--ease-out);
+  }
+  .storage-capacity {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--on-surface-muted);
+    text-align: right;
+    margin-bottom: 14px;
+  }
+  .storage-practical {
+    background: var(--surface-lowest);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 12px 14px;
+    margin-top: 14px;
+    font-size: var(--text-sm);
+    color: var(--on-surface-secondary);
+    line-height: 1.6;
+  }
+  .storage-practical strong { color: var(--on-surface); }
   .star-btn { font-size: 14px; line-height: 1; }
   .star-btn.active { color: var(--accent-yellow); }
   .entry-star { font-family: var(--font-mono); font-size: var(--text-xs); font-weight: 600; color: var(--accent-yellow); background: rgba(250,204,21,0.08); border: 1px solid rgba(250,204,21,0.2); padding: 2px 8px; border-radius: var(--radius-sm); white-space: nowrap; }
@@ -1315,6 +1448,18 @@
         <button class="filter-chip" data-sort="time" onclick="setSortOrder('time', this)">Time spent</button>
       </div>
 
+      <div class="bulk-bar" id="bulkBar">
+        <input type="checkbox" class="entry-check" id="bulkSelectAll" onchange="toggleSelectAll(this.checked)" title="Select / deselect all">
+        <span class="bulk-bar-count" id="bulkCount">0 selected</span>
+        <button class="bulk-btn" onclick="bulkStar()">★ Star</button>
+        <button class="bulk-btn" onclick="bulkUnstar()">☆ Unstar</button>
+        <span class="bulk-sep"></span>
+        <button class="bulk-btn" onclick="bulkRevisit()">↺ Revisit</button>
+        <button class="bulk-btn" onclick="bulkUnrevisit()">✓ Clear revisit</button>
+        <span class="bulk-sep"></span>
+        <button class="bulk-btn danger" onclick="bulkDelete()">✕ Delete</button>
+        <button class="bulk-btn bulk-btn-cancel" onclick="clearSelection()">Cancel</button>
+      </div>
       <div id="logList"></div>
     </section>
 
@@ -1443,6 +1588,17 @@
         <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 1v9m0 0L5 7m3 3 3-3M2 13h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
         Download
       </button>
+    </div>
+  </div>
+</div>
+
+<div class="export-overlay" id="storageOverlay" onclick="if(event.target===event.currentTarget){document.getElementById('storageOverlay').classList.remove('open')}">
+  <div class="export-modal" style="width:460px">
+    <div class="export-modal-title">Storage Usage</div>
+    <div class="export-modal-subtitle">localStorage quota — press Escape to close</div>
+    <div id="storageContent"></div>
+    <div class="export-modal-actions">
+      <button class="export-btn-cancel" onclick="document.getElementById('storageOverlay').classList.remove('open')">Close</button>
     </div>
   </div>
 </div>
@@ -2146,8 +2302,9 @@ function renderLog() {
       ? `<a class="entry-name" href="${escAttr(e.url)}" target="_blank" rel="noopener">${esc(e.name)}</a>`
       : `<span class="entry-name">${esc(e.name)}</span>`;
     html += `
-      <div class="entry-card ${e.revisit ? 'revisit' : ''}">
+      <div class="entry-card ${e.revisit ? 'revisit' : ''} ${bulkSelected.has(e.id) ? 'bulk-selected' : ''}" data-eid="${e.id}">
         <div class="entry-top">
+          <input type="checkbox" class="entry-check" ${bulkSelected.has(e.id) ? 'checked' : ''} onchange="toggleBulkSelect('${e.id}', this.checked)">
           <span class="tag ${platformColorClass(e.platform)}" style="padding:3px 10px">${esc(e.platform)}</span>
           ${nameHtml}
           ${e.difficulty ? `<span class="entry-diff">${esc(e.difficulty)}</span>` : ''}
@@ -2171,6 +2328,7 @@ function renderLog() {
       </div>`;
   }
   list.innerHTML = html;
+  updateBulkBar();
 }
 
 // ── Suggestions (datalists) ──────────────────────
@@ -2198,7 +2356,7 @@ function readForm() {
     mins: Math.max(0, parseInt(document.getElementById('qaMins').value, 10) || 0),
     confidence: parseInt(document.getElementById('qaConfidence').value, 10) || 0,
     method: document.getElementById('qaMethod').value || '',
-    attempt: Math.max(0, parseInt(document.getElementById('qaAttempt').value, 10) || 0),
+    attempt: Math.max(1, parseInt(document.getElementById('qaAttempt').value, 10) || 1),
     starred: document.getElementById('qaStar').checked,
     revisit: document.getElementById('qaRevisit').checked,
     contest: document.getElementById('qaContest').checked,
@@ -2292,6 +2450,86 @@ function deleteEntry(id) {
   showToast('Deleted');
 }
 
+// ── Bulk Selection ───────────────────────────────
+const bulkSelected = new Set();
+
+function updateBulkBar() {
+  const bar = document.getElementById('bulkBar');
+  const n = bulkSelected.size;
+  if (n > 0) {
+    bar.classList.add('visible');
+    document.getElementById('bulkCount').textContent = n + ' selected';
+  } else {
+    bar.classList.remove('visible');
+  }
+  // sync "select all" checkbox
+  const entries = filteredEntries();
+  const all = entries.length > 0 && entries.every(e => bulkSelected.has(e.id));
+  document.getElementById('bulkSelectAll').checked = all;
+}
+
+function toggleBulkSelect(id, checked) {
+  if (checked) bulkSelected.add(id); else bulkSelected.delete(id);
+  const card = document.querySelector(`[data-eid="${id}"]`);
+  if (card) card.classList.toggle('bulk-selected', checked);
+  updateBulkBar();
+}
+
+function toggleSelectAll(checked) {
+  const entries = filteredEntries();
+  if (checked) {
+    entries.forEach(e => bulkSelected.add(e.id));
+  } else {
+    entries.forEach(e => bulkSelected.delete(e.id));
+  }
+  // update checkboxes in DOM without full re-render
+  document.querySelectorAll('#logList .entry-check').forEach(cb => { cb.checked = checked; });
+  document.querySelectorAll('#logList .entry-card').forEach(c => { c.classList.toggle('bulk-selected', checked); });
+  updateBulkBar();
+}
+
+function clearSelection() {
+  bulkSelected.clear();
+  document.querySelectorAll('#logList .entry-check').forEach(cb => { cb.checked = false; });
+  document.querySelectorAll('#logList .entry-card').forEach(c => { c.classList.remove('bulk-selected'); });
+  updateBulkBar();
+}
+
+function bulkDelete() {
+  const n = bulkSelected.size;
+  if (!n || !confirm('Delete ' + n + ' selected solve' + (n === 1 ? '' : 's') + '?')) return;
+  state.entries = state.entries.filter(e => !bulkSelected.has(e.id));
+  if (editingId && bulkSelected.has(editingId)) cancelEdit(true);
+  bulkSelected.clear();
+  save();
+  renderAll();
+  showToast('Deleted ' + n + ' solve' + (n === 1 ? '' : 's'));
+}
+
+function bulkStar() {
+  if (!bulkSelected.size) return;
+  state.entries.forEach(e => { if (bulkSelected.has(e.id)) e.starred = true; });
+  save(); renderAll(); showToast('Starred ' + bulkSelected.size);
+}
+
+function bulkUnstar() {
+  if (!bulkSelected.size) return;
+  state.entries.forEach(e => { if (bulkSelected.has(e.id)) e.starred = false; });
+  save(); renderAll(); showToast('Unstarred ' + bulkSelected.size);
+}
+
+function bulkRevisit() {
+  if (!bulkSelected.size) return;
+  state.entries.forEach(e => { if (bulkSelected.has(e.id)) e.revisit = true; });
+  save(); renderAll(); showToast('Marked ' + bulkSelected.size + ' for revisit');
+}
+
+function bulkUnrevisit() {
+  if (!bulkSelected.size) return;
+  state.entries.forEach(e => { if (bulkSelected.has(e.id)) e.revisit = false; });
+  save(); renderAll(); showToast('Unmarked ' + bulkSelected.size + ' from revisit');
+}
+
 // ── Export / Import ──────────────────────────────
 function exportData() {
   document.getElementById('exportFilename').value = 'solve-log-' + todayStr() + '.json';
@@ -2302,7 +2540,8 @@ function handleOverlayClick(ev) { if (ev.target === ev.currentTarget) closeExpor
 function confirmExport() {
   let name = document.getElementById('exportFilename').value.trim() || 'solve-log.json';
   if (!name.endsWith('.json')) name += '.json';
-  const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+  const exportData = Object.assign({}, state, { exported_at: new Date().toISOString() });
+  const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = name;
@@ -2334,7 +2573,7 @@ function importData(input) {
         mins: Math.max(0, parseInt(e.mins, 10) || 0),
         confidence: parseInt(e.confidence, 10) || 0,
         method: e.method ? String(e.method) : '',
-        attempt: Math.max(0, parseInt(e.attempt, 10) || 0),
+        attempt: Math.max(1, parseInt(e.attempt, 10) || 1),
         starred: !!e.starred,
         revisit: !!e.revisit,
         contest: !!e.contest,
@@ -2376,7 +2615,7 @@ function setCsvPlatform(val, btn) {
 }
 
 function confirmCSVExport() {
-  const cols = ['name', 'platform', 'difficulty', 'date', 'tags', 'url', 'note', 'mins', 'confidence', 'method', 'attempt', 'revisit', 'contest'];
+  const cols = ['name', 'platform', 'difficulty', 'date', 'tags', 'url', 'note', 'mins', 'confidence', 'method', 'attempt', 'starred', 'revisit', 'contest'];
   const q = v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
   const rows = [cols.join(',')];
   let entries = [...state.entries];
@@ -2389,7 +2628,7 @@ function confirmCSVExport() {
       q(e.name), q(e.platform), q(e.difficulty || ''), q(e.date),
       q((e.tags || []).join('; ')), q(e.url || ''), q(e.note || ''),
       e.mins > 0 ? e.mins : '', e.confidence || '', e.method || '', e.attempt > 1 ? e.attempt : '',
-      e.revisit ? 'yes' : '', e.contest ? 'yes' : '',
+      e.starred ? 'yes' : '', e.revisit ? 'yes' : '', e.contest ? 'yes' : '',
     ].join(','));
   }
   const blob = new Blob(['\ufeff' + rows.join('\r\n')], { type: 'text/csv;charset=utf-8' });
@@ -2479,7 +2718,7 @@ async function fetchCF() {
         mins: 0,
         confidence: 0,
         method: '',
-        attempt: 0,
+        attempt: 1,
         starred: false,
         revisit: false,
         contest: sub.author && sub.author.participantType === 'CONTESTANT',
@@ -2518,10 +2757,10 @@ function renderAnalytics() {
   const uniquePlats = new Set(entries.map(e => e.platform.toLowerCase())).size;
 
   document.getElementById('analyticsStats').innerHTML =
-    `<div class="stat-card"><div class="stat-label">Avg Time</div><div class="stat-value">${avgTime}<small style="font-size:12px;color:var(--on-surface-secondary)"> min</small></div></div>` +
-    `<div class="stat-card"><div class="stat-label">Avg Confidence</div><div class="stat-value">${avgConf}<small style="font-size:12px;color:var(--on-surface-secondary)"> /3</small></div></div>` +
-    `<div class="stat-card"><div class="stat-label">Solo Rate</div><div class="stat-value">${soloPct}%</div></div>` +
-    `<div class="stat-card"><div class="stat-label">Platforms</div><div class="stat-value">${uniquePlats}</div></div>`;
+    `<div class="stat-card"><div class="stat-card-label">Avg Time</div><div class="stat-card-value">${avgTime}<small style="font-size:12px;color:var(--on-surface-secondary)"> min</small></div></div>` +
+    `<div class="stat-card"><div class="stat-card-label">Avg Confidence</div><div class="stat-card-value">${avgConf}<small style="font-size:12px;color:var(--on-surface-secondary)"> /3</small></div></div>` +
+    `<div class="stat-card"><div class="stat-card-label">Solo Rate</div><div class="stat-card-value">${soloPct}%</div></div>` +
+    `<div class="stat-card"><div class="stat-card-label">Platforms</div><div class="stat-card-value">${uniquePlats}</div></div>`;
 
   // ── Avg time by difficulty ──
   const diffTime = {};
@@ -2671,6 +2910,40 @@ function renderAnalytics() {
   }
 }
 
+// ── Storage Info ─────────────────────────────────
+function showStorageInfo() {
+  const LIMIT = 5 * 1024 * 1024; // 5MB
+  const myKeys = ['solvelog_state'];
+  let totalUsed = 0, myUsed = 0;
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    const size = (k.length + (localStorage.getItem(k) || '').length) * 2; // UTF-16
+    totalUsed += size;
+    if (myKeys.includes(k)) myUsed += size;
+  }
+  const remaining = Math.max(0, LIMIT - totalUsed);
+  const pct = Math.min(100, (totalUsed / LIMIT) * 100);
+  const fmt = b => b < 1024 ? b + ' B' : b < 1048576 ? (b / 1024).toFixed(1) + ' KB' : (b / 1048576).toFixed(2) + ' MB';
+
+  // Practical estimate: avg bytes per solve entry
+  const entryCount = state.entries.length;
+  const avgEntry = entryCount > 0 ? Math.round(myUsed / entryCount) : 350;
+  const canFit = Math.floor(remaining / avgEntry);
+
+  const barColor = pct > 90 ? 'var(--accent-red)' : pct > 70 ? 'var(--accent-amber)' : 'var(--accent-green)';
+
+  document.getElementById('storageContent').innerHTML =
+    `<div class="storage-bar-track"><div class="storage-bar-fill" style="width:${pct.toFixed(1)}%;background:${barColor}"></div></div>` +
+    `<div class="storage-capacity">${fmt(totalUsed)} / ${fmt(LIMIT)} used (${pct.toFixed(1)}%)</div>` +
+    `<div class="storage-row"><span class="storage-row-label">Solve Log data</span><span class="storage-row-value">${fmt(myUsed)}</span></div>` +
+    `<div class="storage-row"><span class="storage-row-label">Other dashboards</span><span class="storage-row-value">${fmt(totalUsed - myUsed)}</span></div>` +
+    `<div class="storage-row"><span class="storage-row-label">Remaining</span><span class="storage-row-value">${fmt(remaining)}</span></div>` +
+    `<div class="storage-row"><span class="storage-row-label">Current solves</span><span class="storage-row-value">${entryCount}</span></div>` +
+    `<div class="storage-practical">At current avg entry size (${fmt(avgEntry)}/solve), you can fit ~<strong>${canFit.toLocaleString()} more solves</strong> before hitting the 5 MB limit.</div>`;
+
+  document.getElementById('storageOverlay').classList.add('open');
+}
+
 // ── Keyboard shortcuts ───────────────────────────
 document.addEventListener('keydown', (e) => {
   if (e.metaKey || e.ctrlKey || e.altKey) return;
@@ -2680,6 +2953,21 @@ document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') t.blur();
     return;
   }
+  if (e.key === 'Tab') {
+    e.preventDefault();
+    const pages = ['quant-finance-dashboard.html','brainstellar-dashboard.html','cses-tracker.html','solve-log.html'];
+    const cur = 3;
+    window.location.href = pages[e.shiftKey ? (cur - 1 + pages.length) % pages.length : (cur + 1) % pages.length];
+    return;
+  }
+  if (e.key === 'Escape') {
+    if (document.getElementById('storageOverlay').classList.contains('open')) {
+      document.getElementById('storageOverlay').classList.remove('open');
+      return;
+    }
+    if (bulkSelected.size) { clearSelection(); return; }
+  }
+  if (e.key === '?') { showStorageInfo(); return; }
   if (e.key === 'n' || e.key === 'N') {
     e.preventDefault();
     switchView('log'); // switchView already focuses the name field
