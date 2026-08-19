@@ -1716,7 +1716,9 @@ function diffBucket(d) {
   const digits = s.replace(/[^0-9]/g, '');
   if (digits.length >= 3) {
     const n = parseInt(digits, 10);
-    if (n < 1200) return '&lt; 1200';
+    if (n <= 800) return '800';
+    if (n <= 1000) return '900–1000';
+    if (n < 1200) return '1100–1200';
     if (n < 1600) return '1200–1599';
     if (n < 2000) return '1600–1999';
     return '2000+';
@@ -1736,8 +1738,8 @@ function diffSortVal(d) {
   if (/hard|difficult|expert|advanced/.test(s)) return 300;
   return 50000;
 }
-const DIFF_ORDER = ['Easy', 'Medium', 'Hard', '&lt; 1200', '1200–1599', '1600–1999', '2000+', 'Other'];
-const DIFF_COLOR = { 'Easy': '--accent-green', 'Medium': '--accent-amber', 'Hard': '--accent-red', '&lt; 1200': '--accent-emerald', '1200–1599': '--accent-sky', '1600–1999': '--accent-purple', '2000+': '--accent-rose', 'Other': '--accent-slate' };
+const DIFF_ORDER = ['Easy', 'Medium', 'Hard', '800', '900–1000', '1100–1200', '1200–1599', '1600–1999', '2000+', 'Other'];
+const DIFF_COLOR = { 'Easy': '--accent-green', 'Medium': '--accent-amber', 'Hard': '--accent-red', '800': '--accent-teal', '900–1000': '--accent-emerald', '1100–1200': '--accent-lime', '1200–1599': '--accent-sky', '1600–1999': '--accent-purple', '2000+': '--accent-rose', 'Other': '--accent-slate' };
 function diffCounts() {
   const m = {};
   let untagged = 0;
@@ -2775,8 +2777,7 @@ function renderAnalytics() {
   const maxDiffTime = Math.max(...diffTimeEntries.map(r => r[1]), 1);
   document.getElementById('analyticsTimeDiff').innerHTML = diffTimeEntries.length
     ? diffTimeEntries.map(([label, avg]) => {
-      const displayLabel = label === '&lt; 1200' ? '< 1200' : label;
-      return `<div class="analytics-bar-row"><div class="analytics-bar-label">${displayLabel}</div><div class="analytics-bar-track"><div class="analytics-bar-fill" style="width:${avg/maxDiffTime*100}%;background:var(${DIFF_COLOR[label] || '--accent-slate'})"></div></div><div class="analytics-bar-val">${avg}m</div></div>`;
+      return `<div class="analytics-bar-row"><div class="analytics-bar-label">${label}</div><div class="analytics-bar-track"><div class="analytics-bar-fill" style="width:${avg/maxDiffTime*100}%;background:var(${DIFF_COLOR[label] || '--accent-slate'})"></div></div><div class="analytics-bar-val">${avg}m</div></div>`;
     }).join('')
     : '<div class="analytics-empty">No timed solves with difficulty</div>';
 
@@ -2822,7 +2823,7 @@ function renderAnalytics() {
           const n = w.buckets[b] || 0;
           if (n > 0) {
             const h = Math.max(4, Math.round((n / maxWeekTotal) * CH));
-            const tip = (b === '&lt; 1200' ? '< 1200' : b) + ': ' + n;
+            const tip = b + ': ' + n;
             col += `<div style="height:${h}px;background:var(${DIFF_COLOR[b] || '--accent-slate'});border-radius:2px" title="${tip}"></div>`;
           }
         }
@@ -2835,8 +2836,7 @@ function renderAnalytics() {
     html += '</div>';
     html += '<div class="analytics-stacked-legend" style="margin-top:10px">';
     for (const b of activeDiffs) {
-      const displayLabel = b === '&lt; 1200' ? '< 1200' : b;
-      html += `<div class="analytics-stacked-legend-item"><span class="analytics-stacked-legend-dot" style="background:var(${DIFF_COLOR[b] || '--accent-slate'})"></span>${displayLabel}</div>`;
+      html += `<div class="analytics-stacked-legend-item"><span class="analytics-stacked-legend-dot" style="background:var(${DIFF_COLOR[b] || '--accent-slate'})"></span>${b}</div>`;
     }
     html += '</div>';
     document.getElementById('analyticsDiffProg').innerHTML = html;
