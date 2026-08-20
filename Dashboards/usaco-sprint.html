@@ -705,6 +705,9 @@
   }
   .prob-input:focus { border-color: var(--primary); }
   .prob-input::placeholder { color: var(--on-surface-muted); }
+  .prob-input::-webkit-outer-spin-button,
+  .prob-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .prob-input[type="number"] { -moz-appearance: textfield; }
 
   .revisit-btn {
     font-family: var(--font-mono); font-size: var(--text-xs); font-weight: 600;
@@ -1578,7 +1581,7 @@ const TOTAL = PROBLEMS.filter(p => p.day > 0).length;
 const TOPICS = [...new Set(PROBLEMS.map(p => p.topic))].sort();
 const DIFFS = ['Very Easy', 'Easy', 'Normal', 'Hard', 'Very Hard'];
 const STATUS_OPTIONS = ['not_started', 'clean', 'hint', 'sol', 'skip'];
-const STATUS_LABELS = { not_started: '--', clean: 'Clean', hint: 'Hint', sol: 'Sol', skip: 'Skip' };
+const STATUS_LABELS = { not_started: '--', clean: 'Solved', hint: 'Hint', sol: 'Editorial', skip: 'Skip' };
 
 // ── XSS helpers ──
 function esc(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
@@ -1883,7 +1886,7 @@ function buildProbRow(p, isReplacement) {
     swapCol +
     '<button class="revisit-btn ' + (s.revisit ? 'active' : '') + '" onclick="toggleRevisit(\'' + k + '\')">' + (s.revisit ? 'Yes' : 'No') + '</button>' +
   '</div>';
-  out += '<div class="prob-notes-row"><input type="text" class="prob-notes-input" placeholder="One-line note / mistake..." value="' + escAttr(s.notes || '') + '" onchange="setNotes(\'' + k + '\', this.value)"></div>';
+  out += '<div class="prob-notes-row"><input type="text" class="prob-notes-input" placeholder="One-line note / mistake..." value="' + escAttr(s.notes || '') + '" onkeydown="if(event.key===\'Enter\'){this.blur()}" onchange="setNotes(\'' + k + '\', this.value)"></div>';
   return out;
 }
 
