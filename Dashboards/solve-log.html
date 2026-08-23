@@ -540,6 +540,80 @@
   }
   .qa-field input::placeholder { color: var(--on-surface-muted); }
   .qa-field input[type="date"] { color-scheme: dark; font-family: var(--font-mono); font-size: var(--text-sm); padding: 9px 10px; }
+  input[type="number"] { -moz-appearance: textfield; }
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+
+  /* CF rating range slider */
+  .cf-range-wrap { position: relative; height: 40px; margin: 12px 0 4px; }
+  .cf-range-track { position: absolute; top: 16px; left: 0; right: 0; height: 6px; background: var(--surface-container-high); border-radius: 3px; }
+  .cf-range-fill { position: absolute; top: 16px; height: 6px; background: linear-gradient(90deg, var(--primary), var(--accent-sky)); border-radius: 3px; transition: left 80ms var(--ease-out), right 80ms var(--ease-out); }
+  .cf-range-wrap input[type="range"] {
+    position: absolute; top: 0; left: 0; width: 100%; height: 40px;
+    -webkit-appearance: none; appearance: none; background: none; pointer-events: none; margin: 0;
+  }
+  .cf-range-wrap input[type="range"]::-webkit-slider-runnable-track { background: none; border: none; height: 6px; }
+  .cf-range-wrap input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%;
+    background: var(--primary); border: 2.5px solid var(--surface); cursor: pointer;
+    pointer-events: auto; box-shadow: 0 1px 6px rgba(0,0,0,0.35), 0 0 0 0 rgba(88,166,255,0);
+    transition: box-shadow 200ms var(--ease-out), transform 200ms var(--ease-out);
+    margin-top: -6px;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .cf-range-wrap input[type="range"]::-webkit-slider-thumb:hover {
+      box-shadow: 0 1px 8px rgba(0,0,0,0.4), 0 0 0 6px rgba(88,166,255,0.12);
+      transform: scale(1.15);
+    }
+  }
+  .cf-range-wrap input[type="range"]:active::-webkit-slider-thumb {
+    box-shadow: 0 1px 8px rgba(0,0,0,0.45), 0 0 0 8px rgba(88,166,255,0.18);
+    transform: scale(1.1);
+  }
+  .cf-range-wrap input[type="range"]::-moz-range-track { background: none; border: none; height: 6px; }
+  .cf-range-wrap input[type="range"]::-moz-range-thumb {
+    width: 18px; height: 18px; border-radius: 50%;
+    background: var(--primary); border: 2.5px solid var(--surface); cursor: pointer;
+    pointer-events: auto; box-shadow: 0 1px 6px rgba(0,0,0,0.35);
+    transition: box-shadow 200ms var(--ease-out), transform 200ms var(--ease-out);
+  }
+  .cf-range-wrap input[type="range"]::-moz-range-thumb:hover {
+    box-shadow: 0 1px 8px rgba(0,0,0,0.4), 0 0 0 6px rgba(88,166,255,0.12);
+    transform: scale(1.15);
+  }
+  .cf-range-wrap input[type="range"]:active::-moz-range-thumb {
+    box-shadow: 0 1px 8px rgba(0,0,0,0.45), 0 0 0 8px rgba(88,166,255,0.18);
+    transform: scale(1.1);
+  }
+  .cf-range-labels { display: flex; justify-content: space-between; align-items: center; font-family: var(--font-mono); font-size: var(--text-xs); color: var(--on-surface-secondary); }
+  .cf-range-val { font-weight: 600; color: var(--primary); font-size: var(--text-sm); transition: color 150ms var(--ease-out); }
+
+  /* Live timer */
+  .timer-wrap { display: flex; align-items: end; gap: 6px; }
+  .timer-wrap .qa-field { flex: 1; }
+  .timer-btn {
+    font-family: var(--font-mono); font-size: var(--text-xs); font-weight: 600;
+    padding: 9px 10px; border-radius: var(--radius-sm); cursor: pointer;
+    border: 1px solid var(--surface-container-high); background: var(--surface-container);
+    color: var(--on-surface-secondary); transition: all 150ms var(--ease-out);
+    white-space: nowrap; line-height: 1;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .timer-btn:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-dim); }
+  }
+  .timer-btn.running { border-color: var(--accent-red); color: var(--accent-red); background: rgba(248,81,73,0.08); }
+  @media (hover: hover) and (pointer: fine) {
+    .timer-btn.running:hover { background: rgba(248,81,73,0.15); }
+  }
+  .timer-btn:active { transform: scale(0.95); }
+  .timer-display {
+    font-family: var(--font-mono); font-size: var(--text-xs); color: var(--accent-green);
+    padding: 0 2px; min-width: 48px; text-align: center; line-height: 1;
+    margin-bottom: 10px;
+  }
+  .timer-display.running { animation: timer-pulse 1.5s ease-in-out infinite; }
+  @keyframes timer-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.6; } }
+
   .qa-actions { display: flex; gap: 8px; }
   .btn-primary {
     font-family: var(--font-mono);
@@ -1258,7 +1332,8 @@
         <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(this)">
       </div>
       <div style="display:flex;gap:8px;margin-top:8px;">
-        <button class="btn-io" onclick="openCFImport()" style="flex:1" title="Import solved problems from Codeforces">↗ Codeforces Import</button>
+        <button class="btn-io" onclick="openCFImport()" style="flex:1" title="Import solved problems from Codeforces">↗ CF Import</button>
+        <button class="btn-io" onclick="openLCImport()" style="flex:1" title="Import solved problems from LeetCode">↗ LC Import</button>
       </div>
     </div>
   </nav>
@@ -1330,12 +1405,13 @@
           </div>
           <div class="qa-field">
             <label for="qaPlatform">Platform * <span style="text-transform:none;letter-spacing:0">(pick or type your own)</span></label>
-            <input id="qaPlatform" type="text" list="platformSuggest" placeholder="Pick from list or type any platform…" onkeydown="qaEnter(event)">
+            <input id="qaPlatform" type="text" list="platformSuggest" placeholder="Pick from list or type any platform…" onkeydown="qaEnter(event)" oninput="updateDiffSuggest()">
             <datalist id="platformSuggest"></datalist>
           </div>
           <div class="qa-field">
             <label for="qaDifficulty">Difficulty</label>
-            <input id="qaDifficulty" type="text" placeholder="1400 / Medium / D…" onkeydown="qaEnter(event)">
+            <input id="qaDifficulty" type="text" list="diffSuggest" placeholder="1400 / Medium / Bronze[Normal]…" onkeydown="qaEnter(event)">
+            <datalist id="diffSuggest"></datalist>
           </div>
           <div class="qa-field">
             <label for="qaDate">Date solved</label>
@@ -1357,14 +1433,18 @@
             <button class="btn-ghost" id="qaCancel" onclick="cancelEdit()" style="display:none">Cancel</button>
           </div>
         </div>
-        <div class="qa-grid-2" style="margin-top:10px; grid-template-columns: 1fr 130px 130px 130px; align-items:end;">
+        <div class="qa-grid-2" style="margin-top:10px; grid-template-columns: 1fr 180px 130px 130px; align-items:end;">
           <div class="qa-field">
             <label for="qaNote">Note</label>
             <input id="qaNote" type="text" placeholder="Anything worth remembering — trick, mistake, pattern…" onkeydown="qaEnter(event)">
           </div>
-          <div class="qa-field">
-            <label for="qaMins">Time (min)</label>
-            <input id="qaMins" type="number" min="0" step="1" placeholder="—" onkeydown="qaEnter(event)">
+          <div class="timer-wrap">
+            <div class="qa-field">
+              <label for="qaMins">Time (min)</label>
+              <input id="qaMins" type="number" min="0" step="1" placeholder="—" onkeydown="qaEnter(event)">
+            </div>
+            <button class="timer-btn" id="timerBtn" onclick="toggleTimer()" title="Start / stop timer">▶ Start</button>
+            <div class="timer-display" id="timerDisplay"></div>
           </div>
           <div class="qa-field">
             <label for="qaConfidence">Confidence</label>
@@ -1418,6 +1498,9 @@
       <div id="platformStats" style="display:none"></div>
 
       <div class="filter-bar" id="platformFilterBar"></div>
+      <div class="filter-bar" id="usacoDivFilterBar" style="display:none"></div>
+      <div class="filter-bar" id="usacoDiffFilterBar" style="display:none"></div>
+      <div id="cfRatingFilterBar" style="display:none;padding:0 4px"></div>
       <div class="filter-bar" id="dateFilterBar">
         <span class="filter-bar-label">When</span>
         <button class="filter-chip active" data-range="all" onclick="setDateFilter('all', this)">All time</button>
@@ -1552,6 +1635,28 @@
     <div class="export-modal-actions">
       <button class="export-btn-cancel" onclick="closeCFModal()">Cancel</button>
       <button class="export-btn-download" id="cfImportBtn" onclick="fetchCF()">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 1v9m0 0L5 7m3 3 3-3M2 13h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Import
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="export-overlay" id="lcOverlay" onclick="if(event.target===this)closeLCModal()">
+  <div class="export-modal" style="width:460px">
+    <div class="export-modal-title">Import from LeetCode</div>
+    <div class="export-modal-subtitle">Enter your LeetCode username to import all accepted submissions.</div>
+    <div class="export-field-label">Username</div>
+    <input class="export-filename-input" id="lcHandle" type="text" spellcheck="false" placeholder="e.g. neal_wu" onkeydown="if(event.key==='Enter')fetchLC()" />
+    <div id="lcStatus" style="font-family:var(--font-mono);font-size:var(--text-xs);color:var(--on-surface-muted);margin-top:8px;min-height:18px;"></div>
+    <div id="lcProgress" style="display:none;margin-top:8px;">
+      <div style="height:4px;background:var(--surface-container-high);border-radius:2px;overflow:hidden;">
+        <div id="lcProgressBar" style="height:100%;background:var(--primary);border-radius:2px;transition:width 300ms var(--ease-out);width:0%"></div>
+      </div>
+    </div>
+    <div class="export-modal-actions">
+      <button class="export-btn-cancel" onclick="closeLCModal()">Cancel</button>
+      <button class="export-btn-download" id="lcImportBtn" onclick="fetchLC()">
         <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 1v9m0 0L5 7m3 3 3-3M2 13h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
         Import
       </button>
@@ -1712,6 +1817,17 @@ function computeStreaks() {
 }
 function diffBucket(d) {
   if (!d) return null;
+  // USACO format: Division[Difficulty] — use the difficulty part for generic bucketing
+  const usaco = parseUSACO(d);
+  if (usaco) {
+    const ud = usaco.difficulty.toLowerCase();
+    if (/very\s*easy/.test(ud)) return 'Easy';
+    if (/easy/.test(ud)) return 'Easy';
+    if (/normal|med/.test(ud)) return 'Medium';
+    if (/very\s*hard/.test(ud)) return 'Hard';
+    if (/hard/.test(ud)) return 'Hard';
+    return 'Other';
+  }
   const s = d.trim().toLowerCase();
   const digits = s.replace(/[^0-9]/g, '');
   if (digits.length >= 3) {
@@ -1730,6 +1846,13 @@ function diffBucket(d) {
 }
 function diffSortVal(d) {
   if (!d) return 99999;
+  // USACO: sort by division tier first, then difficulty within
+  const usaco = parseUSACO(d);
+  if (usaco) {
+    const divIdx = USACO_DIVS.indexOf(usaco.division);
+    const diffIdx = USACO_DIFFS.indexOf(usaco.difficulty);
+    return (divIdx >= 0 ? divIdx : 5) * 100 + (diffIdx >= 0 ? diffIdx : 5) * 10;
+  }
   const s = d.trim().toLowerCase();
   const digits = s.replace(/[^0-9]/g, '');
   if (digits.length >= 3) return parseInt(digits, 10);
@@ -1740,6 +1863,21 @@ function diffSortVal(d) {
 }
 const DIFF_ORDER = ['Easy', 'Medium', 'Hard', '800', '900–1000', '1100–1200', '1200–1599', '1600–1999', '2000+', 'Other'];
 const DIFF_COLOR = { 'Easy': '--accent-green', 'Medium': '--accent-amber', 'Hard': '--accent-red', '800': '--accent-teal', '900–1000': '--accent-emerald', '1100–1200': '--accent-lime', '1200–1599': '--accent-sky', '1600–1999': '--accent-purple', '2000+': '--accent-rose', 'Other': '--accent-slate' };
+
+// ── USACO helpers ────────────────────────────────
+const USACO_DIVS = ['Bronze', 'Silver', 'Gold', 'Platinum', 'Advanced'];
+const USACO_DIFFS = ['Very Easy', 'Easy', 'Normal', 'Hard', 'Very Hard'];
+const USACO_DIV_COLOR = { 'Bronze': '--accent-amber', 'Silver': '--accent-slate', 'Gold': '--accent-amber', 'Platinum': '--accent-sky', 'Advanced': '--accent-rose' };
+const USACO_DIV_HEX = { 'Bronze': '#cd7f32', 'Silver': '#a8b5c4', 'Gold': '#ffd700', 'Platinum': '#58a6ff', 'Advanced': '#f47067' };
+const USACO_DIFF_COLOR = { 'Very Easy': '--accent-teal', 'Easy': '--accent-green', 'Normal': '--accent-amber', 'Hard': '--accent-red', 'Very Hard': '--accent-rose' };
+function parseUSACO(d) {
+  if (!d) return null;
+  const m = d.match(/^(Bronze|Silver|Gold|Platinum|Advanced)\s*\[(.+?)\]\s*$/i);
+  if (!m) return null;
+  const div = USACO_DIVS.find(v => v.toLowerCase() === m[1].toLowerCase()) || m[1];
+  const diff = USACO_DIFFS.find(v => v.toLowerCase() === m[2].toLowerCase()) || m[2];
+  return { division: div, difficulty: diff };
+}
 function diffCounts() {
   const m = {};
   let untagged = 0;
@@ -1779,6 +1917,10 @@ let activeDateRange = 'all';
 let activeTag = null;
 let searchQuery = '';
 let showMode = 'all'; // 'all' | 'revisit' | 'contest' | 'starred'
+let activeUSACODiv = 'all'; // USACO division filter
+let activeUSACODiff = 'all'; // USACO difficulty filter
+let cfRatingMin = 0;   // CF rating range filter (0 = no lower bound)
+let cfRatingMax = 4000; // CF rating range filter (4000 = no upper bound)
 let sortOrder = 'date';
 
 // ── Views ────────────────────────────────────────
@@ -1848,6 +1990,10 @@ function renderSidebar() {
 
 function goToPlatform(p) {
   activePlatform = p;
+  activeUSACODiv = 'all';
+  activeUSACODiff = 'all';
+  cfRatingMin = 0;
+  cfRatingMax = 4000;
   switchView('solves');
   renderFilters();
   renderLog();
@@ -2132,6 +2278,73 @@ function renderFilters() {
   }
   bar.innerHTML = html;
 
+  // USACO division + difficulty filter bars
+  const usacoDivBar = document.getElementById('usacoDivFilterBar');
+  const usacoDiffBar = document.getElementById('usacoDiffFilterBar');
+  if (activePlatform === 'USACO') {
+    const uEntries = state.entries.filter(e => e.platform === 'USACO');
+    const divMap = {};
+    const diffMap = {};
+    for (const e of uEntries) {
+      const u = parseUSACO(e.difficulty);
+      if (u) {
+        divMap[u.division] = (divMap[u.division] || 0) + 1;
+        diffMap[u.difficulty] = (diffMap[u.difficulty] || 0) + 1;
+      }
+    }
+    let dh = '<span class="filter-bar-label">Division</span>';
+    dh += `<button class="filter-chip ${activeUSACODiv === 'all' ? 'active' : ''}" onclick="setUSACODivFilter('all')">All</button>`;
+    for (const d of USACO_DIVS) {
+      if (divMap[d]) dh += `<button class="filter-chip ${activeUSACODiv === d ? 'active' : ''}" onclick="setUSACODivFilter('${d}')">${d} (${divMap[d]})</button>`;
+    }
+    usacoDivBar.innerHTML = dh;
+    usacoDivBar.style.display = 'flex';
+
+    let dfh = '<span class="filter-bar-label">Difficulty</span>';
+    dfh += `<button class="filter-chip ${activeUSACODiff === 'all' ? 'active' : ''}" onclick="setUSACODiffFilter('all')">All</button>`;
+    for (const d of USACO_DIFFS) {
+      if (diffMap[d]) dfh += `<button class="filter-chip ${activeUSACODiff === d ? 'active' : ''}" onclick="setUSACODiffFilter('${d}')">${d} (${diffMap[d]})</button>`;
+    }
+    usacoDiffBar.innerHTML = dfh;
+    usacoDiffBar.style.display = 'flex';
+  } else {
+    usacoDivBar.style.display = 'none';
+    usacoDiffBar.style.display = 'none';
+  }
+
+  // CF rating range slider
+  const cfBar = document.getElementById('cfRatingFilterBar');
+  if (activePlatform === 'Codeforces') {
+    const cfEntries = state.entries.filter(e => e.platform === 'Codeforces');
+    const ratings = cfEntries.map(e => parseInt(e.difficulty, 10)).filter(n => n > 0);
+    if (ratings.length) {
+      const rMin = Math.floor(Math.min(...ratings) / 100) * 100;
+      const rMax = Math.ceil(Math.max(...ratings) / 100) * 100;
+      const lo = Math.max(cfRatingMin, rMin);
+      const hi = Math.min(cfRatingMax, rMax);
+      const inRange = ratings.filter(r => r >= cfRatingMin && r <= cfRatingMax).length;
+      const pctL = rMax > rMin ? ((lo - rMin) / (rMax - rMin)) * 100 : 0;
+      const pctR = rMax > rMin ? ((hi - rMin) / (rMax - rMin)) * 100 : 100;
+      cfBar.style.display = 'block';
+      cfBar.innerHTML = `
+        <div class="cf-range-labels">
+          <span>Rating range</span>
+          <span><span class="cf-range-val">${cfRatingMin}</span> — <span class="cf-range-val">${cfRatingMax}</span>
+          <span style="color:var(--on-surface-muted);margin-left:6px">(${inRange} problem${inRange === 1 ? '' : 's'})</span></span>
+        </div>
+        <div class="cf-range-wrap">
+          <div class="cf-range-track"></div>
+          <div class="cf-range-fill" style="left:${pctL}%;right:${100 - pctR}%"></div>
+          <input type="range" min="${rMin}" max="${rMax}" step="100" value="${cfRatingMin}" oninput="setCFRatingMin(+this.value)">
+          <input type="range" min="${rMin}" max="${rMax}" step="100" value="${cfRatingMax}" oninput="setCFRatingMax(+this.value)">
+        </div>`;
+    } else {
+      cfBar.style.display = 'none';
+    }
+  } else {
+    cfBar.style.display = 'none';
+  }
+
   const tagBar = document.getElementById('tagFilterBar');
   if (activeTag) {
     tagBar.style.display = 'flex';
@@ -2144,9 +2357,58 @@ function renderFilters() {
 
 function setPlatformFilter(p, el) {
   activePlatform = p;
+  activeUSACODiv = 'all';
+  activeUSACODiff = 'all';
+  cfRatingMin = 0;
+  cfRatingMax = 4000;
   renderFilters();
   renderLog();
   renderSidebar();
+}
+let _cfSliderRAF = 0;
+function setCFRatingMin(v) {
+  cfRatingMin = v;
+  if (cfRatingMin > cfRatingMax) cfRatingMax = cfRatingMin;
+  updateCFSliderVisuals();
+  cancelAnimationFrame(_cfSliderRAF);
+  _cfSliderRAF = requestAnimationFrame(() => renderLog());
+}
+function setCFRatingMax(v) {
+  cfRatingMax = v;
+  if (cfRatingMax < cfRatingMin) cfRatingMin = cfRatingMax;
+  updateCFSliderVisuals();
+  cancelAnimationFrame(_cfSliderRAF);
+  _cfSliderRAF = requestAnimationFrame(() => renderLog());
+}
+function updateCFSliderVisuals() {
+  const cfBar = document.getElementById('cfRatingFilterBar');
+  if (!cfBar || cfBar.style.display === 'none') return;
+  const inputs = cfBar.querySelectorAll('input[type="range"]');
+  if (inputs.length < 2) return;
+  const rMin = +inputs[0].min, rMax = +inputs[0].max;
+  inputs[0].value = cfRatingMin;
+  inputs[1].value = cfRatingMax;
+  const lo = Math.max(cfRatingMin, rMin), hi = Math.min(cfRatingMax, rMax);
+  const pctL = rMax > rMin ? ((lo - rMin) / (rMax - rMin)) * 100 : 0;
+  const pctR = rMax > rMin ? ((hi - rMin) / (rMax - rMin)) * 100 : 100;
+  const fill = cfBar.querySelector('.cf-range-fill');
+  if (fill) { fill.style.left = pctL + '%'; fill.style.right = (100 - pctR) + '%'; }
+  const vals = cfBar.querySelectorAll('.cf-range-val');
+  if (vals.length >= 2) { vals[0].textContent = cfRatingMin; vals[1].textContent = cfRatingMax; }
+  const ratings = state.entries.filter(e => e.platform === 'Codeforces').map(e => parseInt(e.difficulty, 10)).filter(n => n > 0);
+  const inRange = ratings.filter(r => r >= cfRatingMin && r <= cfRatingMax).length;
+  const countSpan = cfBar.querySelector('.cf-range-labels span[style*="margin-left"]');
+  if (countSpan) countSpan.textContent = '(' + inRange + ' problem' + (inRange === 1 ? '' : 's') + ')';
+}
+function setUSACODivFilter(d) {
+  activeUSACODiv = d;
+  renderFilters();
+  renderLog();
+}
+function setUSACODiffFilter(d) {
+  activeUSACODiff = d;
+  renderFilters();
+  renderLog();
 }
 function setDateFilter(r, el) {
   activeDateRange = r;
@@ -2177,6 +2439,15 @@ function filteredEntries() {
     if (showMode === 'contest' && !e.contest) return false;
     if (showMode === 'starred' && !e.starred) return false;
     if (showMode === 'plain' && (e.starred || e.revisit || e.contest)) return false;
+    if (activePlatform === 'Codeforces' && (cfRatingMin > 0 || cfRatingMax < 4000)) {
+      const r = parseInt(e.difficulty, 10);
+      if (!r || r < cfRatingMin || r > cfRatingMax) return false;
+    }
+    if (activePlatform === 'USACO' || (activePlatform === 'all' && (activeUSACODiv !== 'all' || activeUSACODiff !== 'all'))) {
+      const u = parseUSACO(e.difficulty);
+      if (activeUSACODiv !== 'all') { if (!u || u.division !== activeUSACODiv) return false; }
+      if (activeUSACODiff !== 'all') { if (!u || u.difficulty !== activeUSACODiff) return false; }
+    }
     if (searchQuery) {
       const hay = [e.name, e.platform, e.difficulty || '', e.note || '', e.date || '', ...(e.tags || [])].join(' ').toLowerCase();
       if (!hay.includes(searchQuery)) return false;
@@ -2255,12 +2526,57 @@ function renderPlatformStats() {
         <div class="stat-card-sub">last 30 days</div>
       </div>
     </div>
-    ${diffRows.length ? `<div class="panel" style="margin-bottom:20px"><div class="panel-title">Difficulty</div>${diffRows.map(([b, n]) => `
+    ${activePlatform === 'USACO' ? (() => {
+      const divMap = {}, uDiffMap = {};
+      for (const e of pEntries) {
+        const u = parseUSACO(e.difficulty);
+        if (u) { divMap[u.division] = (divMap[u.division] || 0) + 1; uDiffMap[u.difficulty] = (uDiffMap[u.difficulty] || 0) + 1; }
+      }
+      const divRows = USACO_DIVS.filter(d => divMap[d]).map(d => [d, divMap[d]]);
+      const diffRowsU = USACO_DIFFS.filter(d => uDiffMap[d]).map(d => [d, uDiffMap[d]]);
+      const maxDiv = divRows.length ? Math.max(...divRows.map(r => r[1])) : 1;
+      const maxDiffU = diffRowsU.length ? Math.max(...diffRowsU.map(r => r[1])) : 1;
+      let h = '';
+      if (divRows.length) {
+        h += `<div class="panels-2col" style="margin-bottom:20px"><div class="panel"><div class="panel-title">By Division</div>${divRows.map(([d, n]) => `
+          <div class="bk-row">
+            <span class="bk-name" style="cursor:pointer" onclick="setUSACODivFilter('${d}')">${d}</span>
+            <div class="bk-track"><div class="bk-fill" style="width:${Math.round(n / maxDiv * 100)}%;background:${USACO_DIV_HEX[d]};color:${USACO_DIV_HEX[d]}"></div></div>
+            <span class="bk-count">${n}</span>
+          </div>`).join('')}</div>`;
+        h += `<div class="panel"><div class="panel-title">By Difficulty</div>${diffRowsU.map(([d, n]) => `
+          <div class="bk-row">
+            <span class="bk-name" style="cursor:pointer" onclick="setUSACODiffFilter('${d}')">${d}</span>
+            <div class="bk-track"><div class="bk-fill" style="width:${Math.round(n / maxDiffU * 100)}%;background:var(${USACO_DIFF_COLOR[d] || '--accent-slate'});color:var(${USACO_DIFF_COLOR[d] || '--accent-slate'})"></div></div>
+            <span class="bk-count">${n}</span>
+          </div>`).join('')}</div></div>`;
+      }
+      // Cross-tabulation: division × difficulty grid
+      if (divRows.length && diffRowsU.length) {
+        const cross = {};
+        for (const e of pEntries) {
+          const u = parseUSACO(e.difficulty);
+          if (u) { const k = u.division + '|' + u.difficulty; cross[k] = (cross[k] || 0) + 1; }
+        }
+        const activeDivs = USACO_DIVS.filter(d => divMap[d]);
+        const activeDiffs = USACO_DIFFS.filter(d => uDiffMap[d]);
+        h += `<div class="panel" style="margin-bottom:20px"><div class="panel-title">Division × Difficulty</div>
+          <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-family:var(--font-mono);font-size:var(--text-xs)">
+          <tr><th style="padding:6px 8px;text-align:left;color:var(--on-surface-muted);border-bottom:1px solid var(--surface-container-high)"></th>${activeDiffs.map(d => `<th style="padding:6px 8px;text-align:center;color:var(--on-surface-secondary);border-bottom:1px solid var(--surface-container-high)">${d}</th>`).join('')}<th style="padding:6px 8px;text-align:center;color:var(--on-surface-muted);border-bottom:1px solid var(--surface-container-high)">Total</th></tr>
+          ${activeDivs.map(div => `<tr>
+            <td style="padding:6px 8px;color:${USACO_DIV_HEX[div]};font-weight:600;border-bottom:1px solid var(--surface-container-high)">${div}</td>
+            ${activeDiffs.map(df => { const v = cross[div + '|' + df] || 0; return `<td style="padding:6px 8px;text-align:center;color:${v ? 'var(--on-surface)' : 'var(--on-surface-muted)'};border-bottom:1px solid var(--surface-container-high)">${v || '—'}</td>`; }).join('')}
+            <td style="padding:6px 8px;text-align:center;font-weight:600;color:var(--on-surface-secondary);border-bottom:1px solid var(--surface-container-high)">${divMap[div]}</td>
+          </tr>`).join('')}
+          </table></div></div>`;
+      }
+      return h;
+    })() : (diffRows.length ? `<div class="panel" style="margin-bottom:20px"><div class="panel-title">Difficulty</div>${diffRows.map(([b, n]) => `
       <div class="bk-row">
         <span class="bk-name" style="cursor:default">${b}</span>
         <div class="bk-track"><div class="bk-fill" style="width:${Math.round(n / maxD * 100)}%;background:var(${DIFF_COLOR[b]});color:var(${DIFF_COLOR[b]})"></div></div>
         <span class="bk-count">${n}</span>
-      </div>`).join('')}</div>` : ''}
+      </div>`).join('')}</div>` : '')}
     ${topTags.length ? `<div class="panel" style="margin-bottom:20px"><div class="panel-title">Topics</div>${topTags.map(([t, n]) => `
       <div class="bk-row">
         <span class="bk-name" onclick="goToTag('${escAttr(t)}')">${esc(t)}</span>
@@ -2341,6 +2657,20 @@ function renderSuggestions() {
   const all = [...used, ...DEFAULT_PLATFORMS.filter(p => !usedLower.includes(p.toLowerCase()))];
   document.getElementById('platformSuggest').innerHTML = all.map(p => `<option value="${escAttr(p)}">`).join('');
   document.getElementById('tagSuggest').innerHTML = tagCounts().map(([t]) => `<option value="${escAttr(t)}">`).join('');
+  updateDiffSuggest();
+}
+
+const USACO_DIFF_OPTIONS = [];
+for (const div of USACO_DIVS) for (const df of USACO_DIFFS) USACO_DIFF_OPTIONS.push(div + '[' + df + ']');
+
+function updateDiffSuggest() {
+  const plat = document.getElementById('qaPlatform').value.trim().toLowerCase();
+  const dl = document.getElementById('diffSuggest');
+  if (plat === 'usaco') {
+    dl.innerHTML = USACO_DIFF_OPTIONS.map(o => `<option value="${o}">`).join('');
+  } else {
+    dl.innerHTML = '';
+  }
 }
 
 // ── Add / Edit / Delete ──────────────────────────
@@ -2373,6 +2703,8 @@ function clearForm() {
   document.getElementById('qaRevisit').checked = false;
   document.getElementById('qaContest').checked = false;
   document.getElementById('qaDate').value = todayStr();
+  resetTimer();
+  updateDiffSuggest();
 }
 
 function submitEntry() {
@@ -2644,6 +2976,62 @@ function confirmCSVExport() {
   showToast('Exported ' + sorted.length + ' solves as CSV' + (csvPlatformChoice !== 'all' ? ' (' + csvPlatformChoice + ')' : ''));
 }
 
+// ── Live Timer ───────────────────────────────────
+let _timerStart = 0;
+let _timerInterval = null;
+
+function toggleTimer() {
+  if (_timerInterval) {
+    stopTimer();
+  } else {
+    startTimer();
+  }
+}
+
+function startTimer() {
+  _timerStart = Date.now();
+  const btn = document.getElementById('timerBtn');
+  const disp = document.getElementById('timerDisplay');
+  btn.textContent = '■ Stop';
+  btn.classList.add('running');
+  disp.classList.add('running');
+  disp.textContent = '0:00';
+  _timerInterval = setInterval(() => {
+    const elapsed = Math.floor((Date.now() - _timerStart) / 1000);
+    const m = Math.floor(elapsed / 60);
+    const s = elapsed % 60;
+    disp.textContent = m + ':' + String(s).padStart(2, '0');
+  }, 1000);
+}
+
+function stopTimer() {
+  clearInterval(_timerInterval);
+  const elapsed = Math.round((Date.now() - _timerStart) / 60000);
+  const mins = Math.max(1, elapsed);
+  document.getElementById('qaMins').value = mins;
+  const btn = document.getElementById('timerBtn');
+  const disp = document.getElementById('timerDisplay');
+  btn.textContent = '▶ Start';
+  btn.classList.remove('running');
+  disp.classList.remove('running');
+  disp.textContent = mins + 'm';
+  _timerInterval = null;
+  _timerStart = 0;
+  showToast('Timer stopped — ' + mins + ' min recorded');
+}
+
+function resetTimer() {
+  if (_timerInterval) clearInterval(_timerInterval);
+  _timerInterval = null;
+  _timerStart = 0;
+  const btn = document.getElementById('timerBtn');
+  const disp = document.getElementById('timerDisplay');
+  btn.textContent = '▶ Start';
+  btn.classList.remove('running');
+  disp.classList.remove('running');
+  disp.textContent = '';
+}
+
 // ── Codeforces Import ────────────────────────────
 function openCFImport() {
   document.getElementById('cfHandle').value = '';
@@ -2737,6 +3125,183 @@ async function fetchCF() {
     statusEl.textContent = 'Error: ' + (err.message || 'Failed to fetch');
     statusEl.style.color = 'var(--accent-red)';
     btn.disabled = false;
+  }
+}
+
+// ── LeetCode Import ──────────────────────────────
+function openLCImport() {
+  document.getElementById('lcHandle').value = '';
+  document.getElementById('lcStatus').textContent = '';
+  document.getElementById('lcImportBtn').disabled = false;
+  document.getElementById('lcProgress').style.display = 'none';
+  document.getElementById('lcOverlay').classList.add('open');
+  setTimeout(() => document.getElementById('lcHandle').focus(), 220);
+}
+
+function closeLCModal() {
+  document.getElementById('lcOverlay').classList.remove('open');
+}
+
+async function fetchLC() {
+  const handle = document.getElementById('lcHandle').value.trim();
+  if (!handle) { document.getElementById('lcStatus').textContent = 'Please enter a username.'; return; }
+
+  const statusEl = document.getElementById('lcStatus');
+  const btn = document.getElementById('lcImportBtn');
+  const progressWrap = document.getElementById('lcProgress');
+  const progressBar = document.getElementById('lcProgressBar');
+  statusEl.textContent = 'Fetching submissions...';
+  statusEl.style.color = 'var(--primary)';
+  btn.disabled = true;
+  progressWrap.style.display = 'block';
+  progressBar.style.width = '10%';
+
+  try {
+    // Step 1: verify user exists and get total solved count
+    const profileResp = await fetch('https://leetcode.com/graphql', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        query: `query userProfile($username: String!) {
+          matchedUser(username: $username) {
+            username
+            submitStatsGlobal { acSubmissionNum { difficulty count } }
+          }
+        }`,
+        variables: { username: handle }
+      })
+    });
+    if (!profileResp.ok) throw new Error('HTTP ' + profileResp.status);
+    const profileData = await profileResp.json();
+    if (!profileData.data || !profileData.data.matchedUser) throw new Error('User "' + handle + '" not found');
+
+    const acStats = profileData.data.matchedUser.submitStatsGlobal.acSubmissionNum;
+    const totalSolved = acStats.find(s => s.difficulty === 'All')?.count || 0;
+    statusEl.textContent = 'Found ' + totalSolved + ' solved problems. Fetching details...';
+    progressBar.style.width = '25%';
+
+    // Step 2: fetch accepted submissions in batches
+    const allSubs = [];
+    const BATCH = 50;
+    let offset = 0;
+    let hasMore = true;
+
+    while (hasMore) {
+      const subResp = await fetch('https://leetcode.com/graphql', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          query: `query recentAcSubmissions($username: String!, $limit: Int!) {
+            recentAcSubmissionList(username: $username, limit: $limit) {
+              title titleSlug timestamp
+            }
+          }`,
+          variables: { username: handle, limit: offset + BATCH }
+        })
+      });
+      if (!subResp.ok) throw new Error('HTTP ' + subResp.status + ' fetching submissions');
+      const subData = await subResp.json();
+      const list = subData.data?.recentAcSubmissionList || [];
+
+      if (list.length <= allSubs.length || list.length === 0) {
+        hasMore = false;
+      } else {
+        allSubs.length = 0;
+        for (const s of list) allSubs.push(s);
+        offset = allSubs.length;
+        const pct = Math.min(90, 25 + (allSubs.length / Math.max(totalSolved, 1)) * 65);
+        progressBar.style.width = pct + '%';
+        statusEl.textContent = 'Fetched ' + allSubs.length + ' of ~' + totalSolved + '...';
+        if (allSubs.length >= totalSolved || list.length < offset) hasMore = false;
+      }
+    }
+
+    progressBar.style.width = '95%';
+
+    // Step 3: fetch difficulty for all problems
+    let diffMap = {};
+    try {
+      const diffResp = await fetch('https://leetcode.com/graphql', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          query: `query problemsetQuestionList {
+            problemsetQuestionList: questionList(categorySlug: "" filters: {} limit: 5000 skip: 0) {
+              questions: data { titleSlug difficulty }
+            }
+          }`
+        })
+      });
+      if (diffResp.ok) {
+        const diffData = await diffResp.json();
+        const qs = diffData.data?.problemsetQuestionList?.questions || [];
+        for (const q of qs) diffMap[q.titleSlug] = q.difficulty;
+      }
+    } catch (_) { /* difficulty lookup is best-effort */ }
+
+    // Step 4: dedupe by titleSlug
+    const seen = new Set();
+    const unique = [];
+    for (const s of allSubs) {
+      if (seen.has(s.titleSlug)) continue;
+      seen.add(s.titleSlug);
+      unique.push(s);
+    }
+
+    // Step 5: dedupe against existing entries
+    const existingNames = new Set(
+      state.entries
+        .filter(e => e.platform.toLowerCase() === 'leetcode')
+        .map(e => e.name.toLowerCase())
+    );
+
+    let added = 0;
+    for (const sub of unique) {
+      if (existingNames.has(sub.title.toLowerCase())) continue;
+
+      const ts = parseInt(sub.timestamp, 10) * 1000;
+      const date = new Date(ts);
+      const dateStr = date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0') + '-' + String(date.getDate()).padStart(2, '0');
+      const diff = diffMap[sub.titleSlug] || '';
+
+      state.entries.push({
+        id: uid(),
+        ts: ts,
+        name: sub.title,
+        platform: 'LeetCode',
+        difficulty: diff,
+        date: dateStr,
+        tags: [],
+        url: 'https://leetcode.com/problems/' + sub.titleSlug + '/',
+        note: '',
+        mins: 0,
+        confidence: 0,
+        method: '',
+        attempt: 1,
+        starred: false,
+        revisit: false,
+        contest: false,
+      });
+      added++;
+    }
+
+    progressBar.style.width = '100%';
+    save();
+    renderAll();
+    closeLCModal();
+    showToast('Imported ' + added + ' new problems from LeetCode' + (unique.length - added > 0 ? ' (' + (unique.length - added) + ' duplicates skipped)' : ''));
+
+  } catch (err) {
+    const msg = err.message || 'Failed to fetch';
+    if (msg.includes('Failed to fetch') || msg.includes('NetworkError') || msg.includes('CORS')) {
+      statusEl.innerHTML = 'Blocked by CORS — LeetCode doesn\'t allow direct browser requests.<br><br>' +
+        '<span style="color:var(--on-surface-secondary)">Fix: install a CORS browser extension (e.g. "Allow CORS"), enable it, and retry.</span>';
+    } else {
+      statusEl.textContent = 'Error: ' + msg;
+    }
+    statusEl.style.color = 'var(--accent-red)';
+    btn.disabled = false;
+    progressWrap.style.display = 'none';
   }
 }
 
@@ -2965,6 +3530,8 @@ document.addEventListener('keydown', (e) => {
       document.getElementById('storageOverlay').classList.remove('open');
       return;
     }
+    if (document.getElementById('lcOverlay').classList.contains('open')) { closeLCModal(); return; }
+    if (document.getElementById('cfOverlay').classList.contains('open')) { closeCFModal(); return; }
     if (bulkSelected.size) { clearSelection(); return; }
   }
   if (e.key === '?') { showStorageInfo(); return; }
