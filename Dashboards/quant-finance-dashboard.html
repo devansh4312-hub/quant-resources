@@ -3089,8 +3089,13 @@ const CS_ROADMAP = [
     description: "The non-negotiable core. Every quant SWE loop starts here — Jane Street and Citadel technology interviews are almost entirely 6.006 and 6.046 territory. Master these before touching any systems course.",
     groups: [
       { label: "Core Courses", items: [
+        { text: "6.042J — Mathematics for Computer Science: Formal Proofs, Induction, Number Theory, Graph Theory, Counting & Combinatorics, Discrete Probability — the mathematical backbone underpinning every algorithms course", link: "https://ocw.mit.edu/courses/6-042j-mathematics-for-computer-science-fall-2010/" },
         { text: "6.006 — Introduction to Algorithms: Data Structures (heaps, hash tables, BSTs), Graph Algorithms (BFS/DFS/Dijkstra/Bellman-Ford), Sorting, Dynamic Programming — the interview bread-and-butter", link: "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-fall-2011/" },
         { text: "6.046J — Design and Analysis of Algorithms: Advanced Greedy Strategies, Network Flow (max-flow/min-cut), NP-Completeness, Randomized Algorithms, Amortized Analysis — separates good from great in SWE interviews", link: "https://ocw.mit.edu/courses/6-046j-design-and-analysis-of-algorithms-spring-2015/" },
+      ]},
+      { label: "Advanced Electives", items: [
+        { text: "6.854J — Advanced Algorithms: Linear Programming, Approximation Algorithms, Randomized Algorithms, Hashing, Streaming, Online Algorithms, Competitive Analysis — graduate-level algorithmic toolkit for research and optimization-heavy roles", link: "https://ocw.mit.edu/courses/6-854j-advanced-algorithms-fall-2008/" },
+        { text: "6.851 — Advanced Data Structures: Persistent & Retroactive Data Structures, Cache-Oblivious B-Trees, Succinct Structures, Lower Bounds, Memory Hierarchy Models — graduate-level deep dive into data structure design and theory", link: "https://ocw.mit.edu/courses/6-851-advanced-data-structures-spring-2012/" },
       ]}
     ]
   },
@@ -3375,8 +3380,13 @@ const STUDY_ORDER = [
     description: "CP already covers most of 6.006 and 6.046J — skim for gaps rather than grinding lectures. 6.003 (signals) is useful for time-series intuition. CS224W is niche but relevant if you work with financial networks or knowledge graphs.",
     groups: [
       { label: "Algorithm Design", courses: [
-        { label: "6.006 — Introduction to Algorithms", source: "cs", key: "cs0_Core Courses_0" },
-        { label: "6.046J — Design and Analysis of Algorithms", source: "cs", key: "cs0_Core Courses_1" },
+        { label: "6.042J — Mathematics for Computer Science", source: "cs", key: "cs0_Core Courses_0" },
+        { label: "6.006 — Introduction to Algorithms", source: "cs", key: "cs0_Core Courses_1" },
+        { label: "6.046J — Design and Analysis of Algorithms", source: "cs", key: "cs0_Core Courses_2" },
+      ]},
+      { label: "Advanced Algorithms & Data Structures", courses: [
+        { label: "6.854J — Advanced Algorithms", source: "cs", key: "cs0_Advanced Electives_0" },
+        { label: "6.851 — Advanced Data Structures", source: "cs", key: "cs0_Advanced Electives_1" },
       ]},
       { label: "Signals & Graphs", courses: [
         { label: "6.003 — Signals and Systems", source: "main", key: "s3_Computation & Optimization_4" },
